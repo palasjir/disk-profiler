@@ -1,2 +1,2 @@
-export const EVENT_START_SCAN = "scan:start";
-export const EVENT_MSG_SCAN = "scan:msg";
+export const EVENT_MSG_TO_SCANNER = "scan:msg:to-scanner";
+export const EVENT_MSG_TO_APP = "scan:msg:to-app";
