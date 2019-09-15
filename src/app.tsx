@@ -1,84 +1,77 @@
-import * as React from "react";
-import * as ReactDOM from "react-dom";
+import * as React from 'react';
+import * as ReactDOM from 'react-dom';
 import styled from 'styled-components';
-import {ipcRenderer, OpenDialogReturnValue, remote, IpcRendererEvent} from 'electron';
+import {observer} from 'mobx-react';
 
-import {EVENT_MSG_SCAN, EVENT_START_SCAN} from './commons/constants';
-import {ScanMessage, ScanState, } from './commons/types';
+import {ScanState,} from './commons/types';
+import {ScanFolderButton} from './components/buttons';
+import {MainStore} from './store/mainStore';
+import {MainStoreContext} from './store/context';
 
-async function selectDirectory(): Promise<OpenDialogReturnValue> {
-    return remote.dialog.showOpenDialog({ properties: ['openDirectory'] })
-}
-
-function startScanDirectory(folder: OpenDialogReturnValue) {
-    if(folder.filePaths.length <= 0) {
-        return;
-    }
-    const selectedDirectory = folder.filePaths[0];
-    console.log(`Selected directory: ${selectedDirectory}`);
-    ipcRenderer.send(EVENT_START_SCAN, selectedDirectory);
-}
-
-const H1 = styled.h1`
-  color: red;
-`;
-
-const Container = styled.div`
+const StyledAppContainer = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
   height: 100vh;
   width: 100vw;
-  background: rgba(0,0,0, .8);
+  background: rgba(0,0, 0 , 0.8);
 `;
 
-const Wrapper = styled.div`
-  background: white;
-  height: 50vh;
-  width: 25vw;
+const StyledModal = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: whitesmoke;
+  padding: 20px;
+  border-radius: 4px;
+  box-shadow: 5px 5px 10px -2px rgba(0,0,0,0.75);
 `;
 
-const ModalWrapper = styled.div`
-  background: rgba(0,0,0, .2);
-`;
-
-function App(): JSX.Element {
-
-    const [scanState, setScanState] = React.useState(ScanState.NOT_STARTED);
-    const [totalSize, setTotalSize] = React.useState();
-
-    async function onClick() {
-        const selectedDirectory = await selectDirectory();
-        startScanDirectory(selectedDirectory);
-    }
-
-    React.useEffect(() => {
-
-        function handleScanMsg(event: IpcRendererEvent, result: ScanMessage): void {
-            setScanState(result.state);
-            const payload = result.payload;
-            if(payload) {
-                setTotalSize(payload.totalSize);
-            }
-        }
-
-       ipcRenderer.on(EVENT_MSG_SCAN, handleScanMsg);
-    }, []);
-
+const ScanHome = observer(function ScanHome(): JSX.Element {
+    const mainStore = React.useContext(MainStoreContext);
     return (
-        <Container>
-            <Wrapper>
-            <H1>Disk analyser</H1>
-            {scanState !== ScanState.IN_PROGRESS && <button onClick={onClick}>Scan directory</button>}
-            {scanState === ScanState.IN_PROGRESS && <h2>Scan in progress ...</h2>}
-            {scanState === ScanState.FINISHED && <h2>Scan finished.</h2>}
-            {totalSize && <h2>Total size: {totalSize} bytes</h2>}
-            </Wrapper>
-        </Container>
+        <StyledModal>
+            <p>Select the folder to scan.</p>
+            {mainStore.scanState !== ScanState.IN_PROGRESS && <ScanFolderButton />}
+        </StyledModal>
     )
-}
+});
 
+const ScanProgress = observer(function ScanProgress(): JSX.Element {
+    const mainStore = React.useContext(MainStoreContext);
+    return (
+        <div>
+            {mainStore.scanState === ScanState.IN_PROGRESS && <h2>Scan in progress ...</h2>}
+        </div>
+    )
+});
+
+const ScanResults = observer(function ScanResult(): JSX.Element {
+    const mainStore = React.useContext(MainStoreContext);
+    return (
+        <div>
+            <h2>Scan finished.</h2>
+            {mainStore.totalSize && <h2>Total size: {mainStore.totalSize} bytes</h2>}
+        </div>
+    );
+});
+
+const App = observer(function App(): JSX.Element {
+    const mainStore = React.useContext(MainStoreContext);
+    return (
+        <StyledAppContainer>
+            {mainStore.scanState === ScanState.NOT_STARTED && <ScanHome />}
+            {mainStore.scanState === ScanState.IN_PROGRESS && <ScanProgress />}
+            {mainStore.scanState === ScanState.FINISHED && <ScanResults />}
+        </StyledAppContainer>
+    )
+});
+
+const store = new MainStore();
 ReactDOM.render(
-    <App />,
+    <MainStoreContext.Provider value={store}>
+        <App />
+    </MainStoreContext.Provider>,
     document.getElementById("app")
 );

@@ -1,7 +1,7 @@
 import { ipcMain, app, BrowserWindow, IpcMainEvent } from 'electron';
 import {EVENT_MSG_SCAN, EVENT_START_SCAN} from './commons/constants';
 
-function createAppWindow(): void {
+async function createMainWindow(): Promise<BrowserWindow> {
     // Create the browser window.
     const mainWindow = new BrowserWindow({
         width: 800,
@@ -10,31 +10,45 @@ function createAppWindow(): void {
             nodeIntegration: true
         }
     });
-    mainWindow.loadFile('app.html');
+
     mainWindow.on('closed', () => {
         // call quit to exit, otherwise the background windows will keep the app running
-        app.quit()
+        app.quit();
     });
 
-    async function startScan(event: IpcMainEvent, arg: string): Promise<void> {
+    /**
+     * Starts new scanner process.
+     */
+    async function startScanner(event: IpcMainEvent, arg: string): Promise<void> {
         console.log('ipcMain start:scan received');
         const scannerWindow = await createScannerWindow();
+
         scannerWindow.once('ready-to-show', () => {
             scannerWindow.webContents.send(EVENT_START_SCAN, arg);
         });
     }
 
-    function forwardMsg(event: IpcMainEvent, msg: string): void {
+    /**
+     * Forwards messages to scanner process.
+     */
+    function toScanner(event: IpcMainEvent, msg: string): void {
         mainWindow.webContents.send(EVENT_MSG_SCAN, msg);
     }
 
-    ipcMain.on(EVENT_START_SCAN, startScan);
-    ipcMain.on(EVENT_MSG_SCAN, forwardMsg);
+    await mainWindow.loadFile('app.html');
 
+    // register IPC events
+    ipcMain.on(EVENT_START_SCAN, startScanner);
+    ipcMain.on(EVENT_MSG_SCAN, toScanner);
+
+    return mainWindow;
 }
 
+/**
+ * Creates hidden window to run second process within one process.
+ */
 async function createScannerWindow(): Promise<BrowserWindow> {
-    const result = await new BrowserWindow({
+    const result = new BrowserWindow({
         width: 50,
         height: 50,
         show: false,
@@ -42,13 +56,14 @@ async function createScannerWindow(): Promise<BrowserWindow> {
             nodeIntegration: true
         }
     });
-    await result.loadFile('scanner.html');
-
     result.on('closed', () => {
         console.log('background window closed')
     });
+    await result.loadFile('scanner.html');
+
     return result
 
 }
 
-app.on('ready', createAppWindow);
+// start application
+app.on('ready', createMainWindow);
