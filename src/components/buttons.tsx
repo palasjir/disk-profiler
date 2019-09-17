@@ -5,13 +5,17 @@ import {Button} from '@material-ui/core';
 import {FolderOpenOutlined} from '@material-ui/icons';
 import {useStyles} from '../styles';
 
-export function ScanFolderButton(): JSX.Element {
+interface ScanFolderButtonProps {
+    readonly title?: string;
+}
+
+export function ScanFolderButton(props: ScanFolderButtonProps): JSX.Element {
     const mainStore = React.useContext(MainStoreContext);
     const styles = useStyles({});
     return (
         <Button variant="contained" onClick={() => mainStore.startDirectoryScan()}>
             <FolderOpenOutlined className={styles.buttonLeftIcon} />
-            Scan folder
+            {props.title || 'Scan folder'}
         </Button>
     )
 }

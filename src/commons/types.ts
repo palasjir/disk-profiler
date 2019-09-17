@@ -16,6 +16,7 @@ export enum ToAppMessageType {
     STARTED='STARTED'
     , FINISHED='FINISHED'
     , CANCEL_IN_PROGRESS='CANCEL_IN_PROGRESS'
+    , UPDATED='UPDATED'
     , READY = 'READY'
     , ERROR='ERROR'
 }

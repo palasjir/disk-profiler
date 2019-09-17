@@ -2,6 +2,7 @@
 import DirectoryNode from './DirectoryNode';
 import {FileData} from './types';
 import FileNode from './FileNode';
+import {normalizePath} from './scannerUtils';
 
 const HEAD_CHARACTER = '.';
 
@@ -24,11 +25,12 @@ export default class DirectoryTree {
     }
 
     public getPathFragments(path: string): string[] {
-        const pathWithoutRoot = this.removeRootPath(path);
+        const normalizedPath = normalizePath(path);
+        const pathWithoutRoot = this.removeRootPath(normalizedPath);
         return pathWithoutRoot.split('/');
     }
 
-    public addDirectory(path: string): DirectoryTree {
+    public addEmptyDirectory(path: string): DirectoryTree {
         if(!this.hasSameRoot(path)){
             return this;
         }

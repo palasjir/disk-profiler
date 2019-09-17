@@ -89,16 +89,17 @@ const ScanResults = observer(function ScanResult(): JSX.Element {
             <Grid container spacing={2} direction="column" justify="flex-start" alignItems="stretch">
                 <Grid item>
                     <Paper className={classes.content}>
+                        <Typography variant="h5" gutterBottom>
+                            Scan finished. Watching for changes ...
+                        </Typography>
                         <Typography gutterBottom>
                             {mainStore.selectedDirectory}
                         </Typography>
+                        <ScanFolderButton title="Scan new directory"/>
                     </Paper>
                 </Grid>
                 <Grid item>
                     <Paper className={classes.content}>
-                        <Typography gutterBottom>
-                            {mainStore.selectedDirectory}
-                        </Typography>
                         <ScanResultsStats
                             sizeInBytes={mainStore.totalSize}
                             numberOfFiles={mainStore.numberOfFiles}
@@ -112,7 +113,7 @@ const ScanResults = observer(function ScanResult(): JSX.Element {
                             <Grid item>
                                 <div>
                                     <Typography variant="h5" gutterBottom>
-                                        10 largest files
+                                        Largest Files
                                     </Typography>
                                     {/*<FsNodeTable nodes={mainStore.topFiles} />*/}
                                 </div>
@@ -128,7 +129,7 @@ const ScanResults = observer(function ScanResult(): JSX.Element {
                         <Grid container direction="column" justify="flex-start" alignItems="stretch">
                             <Grid item>
                                 <Typography variant="h5" gutterBottom>
-                                    10 largest folders
+                                    Largest Folders
                                 </Typography>
                                 {/*<FsNodeTable nodes={mainStore.topFolders} />*/}
                             </Grid>

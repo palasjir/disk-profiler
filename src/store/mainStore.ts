@@ -33,7 +33,6 @@ export class MainStore {
     @observable
     public numberOfFolders?: number;
 
-
     public topFiles: IObservableArray<FileNode> = observable.array([]);
     public topFolders: IObservableArray<FileNode> = observable.array([]);
 
@@ -58,6 +57,9 @@ export class MainStore {
                 break;
             case ToAppMessageType.ERROR:
                 this.handleScanError(msg);
+                break;
+            case ToAppMessageType.UPDATED:
+                this.handleScanFinished(msg);
                 break;
         }
     };

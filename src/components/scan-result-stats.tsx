@@ -1,5 +1,6 @@
 import styled from 'styled-components';
 import * as React from 'react';
+import {formatSize} from '../commons/formatSize';
 
 interface ScanResultsStatsProps {
     readonly sizeInBytes: number;
@@ -28,29 +29,7 @@ const StyledSecondaryStat = styled.div`
       color: rgba(0, 0, 0, 0.4);
 `;
 
-const UNITS = [
-    'B',
-    'kB',
-    'MB',
-    'GB',
-    'TB',
-    'PB',
-    'EB',
-    'ZB',
-    'YB'
-];
 
-function formatSize(size: number): string {
-    if (size < 1) {
-        const numberString = size.toString(10);
-        return numberString + ' ' + UNITS[0];
-    }
-    const exponent = Math.min(Math.floor(Math.log10(size) / 3), UNITS.length - 1);
-    size = Number((size / Math.pow(1000, exponent)).toPrecision(3));
-    const numberString = size.toString(10);
-    const unit = UNITS[exponent];
-    return numberString + ' ' + unit;
-}
 
 export const ScanResultsStats = function ScanResultsStats(props: ScanResultsStatsProps) {
     return(

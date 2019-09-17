@@ -1,9 +1,6 @@
 import {EVENT_MSG_TO_APP, EVENT_MSG_TO_SCANNER} from './commons/constants';
 import {
-    FileData,
-    NodeType,
     ScanStartEventData,
-    SecondaryStats,
     ToAppMessage,
     ToAppMessageType,
     ToScannerMessage,
@@ -12,24 +9,26 @@ import {
 
 import {ipcRenderer} from 'electron';
 import DirectoryTree from './commons/DirectoryTree';
-import {scanDirectoryTree} from './commons/scannerUtils';
+import {createDirectoryTreeWatcher} from './commons/watcher';
 
 let tree: DirectoryTree;
+let watcher: any;
+let canSendUpdates = false;
 
-function addToTop10(current: FileData[], candidate: FileData) {
-    if(current.length < 1) {
-        current.push(candidate);
-    }
-    const index = current.findIndex(node => candidate.size >= node.size);
-    if(index === -1 && current.length < 10) {
-        current.push(candidate);
-    } else {
-        current.splice(index, 0, candidate);
-    }
-    if(current.length > 10) {
-        current.pop();
-    }
-}
+// function addToTop10(current: FileData[], candidate: FileData) {
+//     if(current.length < 1) {
+//         current.push(candidate);
+//     }
+//     const index = current.findIndex(node => candidate.size >= node.size);
+//     if(index === -1 && current.length < 10) {
+//         current.push(candidate);
+//     } else {
+//         current.splice(index, 0, candidate);
+//     }
+//     if(current.length > 10) {
+//         current.pop();
+//     }
+// }
 
 function sendScannerReadyMsg() {
     const msg: ToAppMessage = {
@@ -59,7 +58,21 @@ function sendScanFinishedMsg(tree: DirectoryTree) {
     ipcRenderer.send(EVENT_MSG_TO_APP, msg);
 }
 
-function sensScanError(e: Error) {
+function sendScanUpdatedMsg(tree: DirectoryTree) {
+    const msg: ToAppMessage = {
+        type: ToAppMessageType.UPDATED,
+        data: {
+            tree: {
+                numberOfFiles: 0,
+                numberOfFolders: 0,
+                size: tree.head.sizeInBytes
+            }
+        }
+    };
+    ipcRenderer.send(EVENT_MSG_TO_APP, msg);
+}
+
+function sendScanError(e: any) {
     const toAppMessage = {
         type: ToAppMessageType.ERROR,
         data: e
@@ -68,15 +81,33 @@ function sensScanError(e: Error) {
 }
 
 function startScan(msg: ToScannerMessage) {
+    canSendUpdates = false;
+    if(watcher) {
+        watcher.close();
+        watcher = null;
+    }
     sendScanInProgressMsg();
     const data = msg.data as ScanStartEventData;
-    tree = new DirectoryTree(data.path);
-    try {
-        const result = scanDirectoryTree(data.path, tree);
-        sendScanFinishedMsg(tree);
-    } catch (e) {
-        sensScanError(e);
-    }
+
+    const onUpdate = () => {
+        if(canSendUpdates) {
+            sendScanUpdatedMsg(tree);
+        }
+    };
+
+    [watcher, tree] = createDirectoryTreeWatcher(data.path, {
+        onDirRemoved: onUpdate,
+        onFileAdded: onUpdate,
+        onFileRemoved: onUpdate,
+        onFileChanged: onUpdate,
+        onError(e: any) {
+            sendScanError(e)
+        },
+        onReady(): void {
+            sendScanFinishedMsg(tree);
+            canSendUpdates = true
+        }
+    });
 }
 
 function handleMessage(event: any, msg: ToScannerMessage): void {

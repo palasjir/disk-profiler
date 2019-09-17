@@ -38,7 +38,7 @@ export function scanDirectoryTree(dirPath: string, tree: DirectoryTree): Directo
         node.size = stats.size;
         tree.addFile(path, node);
     } else if (stats.isDirectory()) {
-        tree.addDirectory(path);
+        tree.addEmptyDirectory(path);
         const dirData = FS.readdirSync(dirPath);
         if (dirData){
             dirData.forEach(child => {

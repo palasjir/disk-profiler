@@ -10,6 +10,9 @@ module.exports = {
     filename: "[name].js"
   },
   target: 'electron-renderer',
+  externals: {
+    chokidar: 'chokidar'
+  },
 
   // Enable sourcemaps for debugging webpack's output.
   devtool: "source-map",
@@ -37,6 +40,7 @@ module.exports = {
       {
         enforce: "pre",
         test: /\.js$/,
+        exclude: /node_modules/,
         loader: "source-map-loader"
       }
     ]

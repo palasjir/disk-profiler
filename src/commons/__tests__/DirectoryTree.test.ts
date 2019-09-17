@@ -27,10 +27,10 @@ describe('DirectoryTree', () => {
             const rootPath  = '/root/path';
             const sut = new DirectoryTree(rootPath);
 
-            sut.addDirectory(`${rootPath}/folder1`);
+            sut.addEmptyDirectory(`${rootPath}/folder1`);
             expect(sut.head.getNumberOfDirectories()).toEqual(1);
 
-            sut.addDirectory(`${rootPath}/folder2`);
+            sut.addEmptyDirectory(`${rootPath}/folder2`);
             expect(sut.head.getNumberOfDirectories()).toEqual(2);
         });
 
@@ -38,10 +38,10 @@ describe('DirectoryTree', () => {
             const rootPath  = '/root/path';
             const sut = new DirectoryTree(rootPath);
 
-            sut.addDirectory(`${rootPath}/folder1`);
+            sut.addEmptyDirectory(`${rootPath}/folder1`);
             expect(sut.head.getNumberOfDirectories()).toEqual(1);
 
-            sut.addDirectory(`${rootPath}/folder1`);
+            sut.addEmptyDirectory(`${rootPath}/folder1`);
             expect(sut.head.getNumberOfDirectories()).toEqual(1);
         });
 
@@ -49,7 +49,7 @@ describe('DirectoryTree', () => {
             const rootPath  = '/root/path';
             const sut = new DirectoryTree(rootPath);
 
-            sut.addDirectory(`${rootPath}/folder1/folder1`);
+            sut.addEmptyDirectory(`${rootPath}/folder1/folder1`);
             expect(sut.head.getNumberOfDirectories()).toEqual(1);
             expect(sut.head.getDirectory('folder1').getNumberOfDirectories()).toEqual(1);
         });
