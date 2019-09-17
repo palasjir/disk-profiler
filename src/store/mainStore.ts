@@ -1,6 +1,6 @@
 import {ipcRenderer, IpcRendererEvent, OpenDialogReturnValue, remote} from 'electron';
 import {
-    FsNode,
+    FileData,
     ScanResultData,
     ScanState,
     ToAppMessage,
@@ -10,6 +10,7 @@ import {
 } from '../commons/types';
 import {action, computed, IObservableArray, observable} from 'mobx';
 import {EVENT_MSG_TO_APP, EVENT_MSG_TO_SCANNER} from '../commons/constants';
+import FileNode from '../commons/FileNode';
 
 async function openSelectDirectoryDialog(): Promise<OpenDialogReturnValue> {
     return remote.dialog.showOpenDialog({ properties: ['openDirectory'] })
@@ -21,6 +22,9 @@ export class MainStore {
     public scanState: ScanState = ScanState.NOT_STARTED;
 
     @observable
+    public selectedDirectory?: string;
+
+    @observable
     public totalSize?: number;
 
     @observable
@@ -30,8 +34,8 @@ export class MainStore {
     public numberOfFolders?: number;
 
 
-    public topFiles: IObservableArray<FsNode> = observable.array([]);
-    public topFolders: IObservableArray<FsNode> = observable.array([]);
+    public topFiles: IObservableArray<FileNode> = observable.array([]);
+    public topFolders: IObservableArray<FileNode> = observable.array([]);
 
     public constructor() {
         ipcRenderer.on(EVENT_MSG_TO_APP, this.handleScanMsg);
@@ -83,8 +87,8 @@ export class MainStore {
             this.numberOfFolders = data.tree.numberOfFolders;
             this.topFiles.clear();
             this.topFolders.clear();
-            data.tree.topFiles.forEach(file => this.topFiles.push(file));
-            data.tree.topFolders.forEach(file => this.topFolders.push(file));
+            // data.tree.topFiles.forEach(file => this.topFiles.push(file));
+            // data.tree.topFolders.forEach(file => this.topFolders.push(file));
         }
     };
 
@@ -93,17 +97,18 @@ export class MainStore {
         this.scanState = ScanState.NOT_STARTED;
     };
 
+    @action
     public async startDirectoryScan(): Promise<void> {
         const selectedDirectoryList = await openSelectDirectoryDialog();
         if(selectedDirectoryList.filePaths.length <= 0) {
             return;
         }
-        const selectedDirectory = selectedDirectoryList.filePaths[0];
-        console.log(`Selected directory: ${selectedDirectory}. Initiating scan.`);
+        this.selectedDirectory = selectedDirectoryList.filePaths[0];
+
         const msg: ToScannerMessage = {
             type: ToScannerMessageType.START,
             data: {
-                path: selectedDirectory
+                path: this.selectedDirectory
             }
         };
         ipcRenderer.send(EVENT_MSG_TO_SCANNER, msg);

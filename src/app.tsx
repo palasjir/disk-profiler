@@ -64,6 +64,9 @@ const ScanProgress = observer(function ScanProgress(): JSX.Element {
                             <Typography variant="h5" gutterBottom>
                                 {mainStore.inProgressMsg}
                             </Typography>
+                            <Typography gutterBottom>
+                                {mainStore.selectedDirectory}
+                            </Typography>
                             <LinearProgress />
                         </div>
                     </Grid>
@@ -86,6 +89,16 @@ const ScanResults = observer(function ScanResult(): JSX.Element {
             <Grid container spacing={2} direction="column" justify="flex-start" alignItems="stretch">
                 <Grid item>
                     <Paper className={classes.content}>
+                        <Typography gutterBottom>
+                            {mainStore.selectedDirectory}
+                        </Typography>
+                    </Paper>
+                </Grid>
+                <Grid item>
+                    <Paper className={classes.content}>
+                        <Typography gutterBottom>
+                            {mainStore.selectedDirectory}
+                        </Typography>
                         <ScanResultsStats
                             sizeInBytes={mainStore.totalSize}
                             numberOfFiles={mainStore.numberOfFiles}
@@ -101,7 +114,7 @@ const ScanResults = observer(function ScanResult(): JSX.Element {
                                     <Typography variant="h5" gutterBottom>
                                         10 largest files
                                     </Typography>
-                                    <FsNodeTable nodes={mainStore.topFiles} />
+                                    {/*<FsNodeTable nodes={mainStore.topFiles} />*/}
                                 </div>
                             </Grid>
                             <Grid item>
@@ -117,7 +130,7 @@ const ScanResults = observer(function ScanResult(): JSX.Element {
                                 <Typography variant="h5" gutterBottom>
                                     10 largest folders
                                 </Typography>
-                                <FsNodeTable nodes={mainStore.topFolders} />
+                                {/*<FsNodeTable nodes={mainStore.topFolders} />*/}
                             </Grid>
                             <Grid item>
                                 <Button>Show all folders</Button>

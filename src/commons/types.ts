@@ -50,28 +50,14 @@ export enum NodeType {
 export interface SecondaryStats {
     numberOfFiles: number;
     numberOfFolders: number;
-    topFiles: FsNode[];
-    topFolders: FsNode[];
 }
 
-export interface NodeStats extends SecondaryStats{
+export interface NodeStats extends SecondaryStats {
     size: number;
 }
 
-export interface FsNode {
-    path: string;
-    name: string;
+export interface FileData {
     size: number;
     lastModified: number;
-    type: NodeType;
-}
-
-export interface FileNode extends FsNode {
-    type: NodeType.FILE
-
-}
-
-export interface DirectoryNode extends FsNode {
-    type: NodeType.FOLDER
-    children: FsNode[];
+    path?: number;
 }

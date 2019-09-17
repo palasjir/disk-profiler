@@ -1,10 +1,10 @@
 import {Table, TableBody, TableCell, TableHead, TableRow} from '@material-ui/core';
 import * as React from 'react';
-import {FsNode} from '../commons/types';
+import FileNode from '../commons/FileNode';
 
 
 interface FsNodeTableProps {
-    nodes: FsNode[];
+    nodes: FileNode[];
 }
 
 export function FsNodeTable(props: FsNodeTableProps) {
@@ -19,11 +19,11 @@ export function FsNodeTable(props: FsNodeTableProps) {
         </TableHead>
         <TableBody>
             {props.nodes.map(node => (
-                <TableRow key={node.path}>
+                <TableRow key={node.data.path}>
                     <TableCell component="th" scope="row">{node.name}</TableCell>
-                    <TableCell>{node.size}</TableCell>
-                    <TableCell>{node.lastModified}</TableCell>
-                    <TableCell>{node.path}</TableCell>
+                    <TableCell>{node.data.size}</TableCell>
+                    <TableCell>{node.data.lastModified}</TableCell>
+                    <TableCell>{node.data.path}</TableCell>
                 </TableRow>
             ))}
         </TableBody>
