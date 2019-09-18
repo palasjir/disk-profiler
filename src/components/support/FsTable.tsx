@@ -19,11 +19,11 @@ export function FsNodeTable(props: FsNodeTableProps) {
         </TableHead>
         <TableBody>
             {props.nodes.map(node => (
-                <TableRow key={node.data.path}>
+                <TableRow key={node.info.path}>
                     <TableCell component="th" scope="row">{node.name}</TableCell>
-                    <TableCell>{node.data.size}</TableCell>
-                    <TableCell>{node.data.lastModified}</TableCell>
-                    <TableCell>{node.data.path}</TableCell>
+                    <TableCell>{node.info.size}</TableCell>
+                    <TableCell>{node.info.lastModified}</TableCell>
+                    <TableCell>{node.info.path}</TableCell>
                 </TableRow>
             ))}
         </TableBody>

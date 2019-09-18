@@ -58,15 +58,16 @@ export function createRemoveDirectoryUpdater(dirToRemove: DirectoryNode): DirInf
 }
 
 export function createRemoveFileUpdater(fileToRemove: FileNode): DirInfoUpdater {
+    const size = fileToRemove.info.size;
     return {
-        sizeInBytes: current => current.sizeInBytes - fileToRemove.data.size,
+        sizeInBytes: current => current.sizeInBytes - size,
         totalNumberOfFiles: current => current.totalNumberOfFiles - 1
     }
 }
 
 export function createAddFileUpdater(newFile: FileNode): DirInfoUpdater {
     return {
-        sizeInBytes: current => current.sizeInBytes + newFile.data.size,
+        sizeInBytes: current => current.sizeInBytes + newFile.info.size,
         totalNumberOfFiles: current => current.totalNumberOfFiles + 1
     }
 }

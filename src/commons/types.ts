@@ -49,7 +49,7 @@ export interface NodeStats extends SecondaryStats {
 export interface FileInfo {
     size: number;
     lastModified: number;
-    path?: number;
+    path?: string;
 }
 
 export interface DirInfo {

@@ -1,7 +1,7 @@
 import DirectoryTree from '../../models/DirectoryTree';
 import {
     extractFileListFromNode,
-    extractFileListFromTree
+    extractFileListFromTree, getTopFiles
 } from '../tree';
 import {FileInfo} from '../../commons/types';
 import DirectoryNode from '../../models/DirectoryNode';
@@ -9,6 +9,7 @@ import DirectoryNode from '../../models/DirectoryNode';
 const rootPath = '/root/path';
 const defaultFileData: FileInfo = { size: 500, lastModified: 0};
 const path = (p: string) => rootPath + p;
+const cData = (p: string):FileInfo => ({...defaultFileData, path: path(p)});
 
 describe('extractFileListFromTree()', () => {
 
@@ -34,14 +35,14 @@ describe('extractFileListFromTree()', () => {
         const result = extractFileListFromTree(tree);
 
         expect(result).toHaveLength(8);
-        expect(result).toContain(path('/file1.txt'));
-        expect(result).toContain(path('/file2.txt'));
-        expect(result).toContain(path('/dir1/file3.txt'));
-        expect(result).toContain(path('/dir1/file4.txt'));
-        expect(result).toContain(path('/dir2/file5.txt'));
-        expect(result).toContain(path('/dir2/file6.txt'));
-        expect(result).toContain(path('/dir1/nested1/file7.txt'));
-        expect(result).toContain(path('/dir1/nested1/file8.txt'));
+        expect(result).toContainEqual(cData('/file1.txt'));
+        expect(result).toContainEqual(cData('/file2.txt'));
+        expect(result).toContainEqual(cData('/dir1/file3.txt'));
+        expect(result).toContainEqual(cData('/dir1/file4.txt'));
+        expect(result).toContainEqual(cData('/dir2/file5.txt'));
+        expect(result).toContainEqual(cData('/dir2/file6.txt'));
+        expect(result).toContainEqual(cData('/dir1/nested1/file7.txt'));
+        expect(result).toContainEqual(cData('/dir1/nested1/file8.txt'));
     });
 
 });
@@ -70,14 +71,63 @@ describe('extractFileListFromNode()', () => {
         const result = extractFileListFromNode(tree.head, rootPath);
 
         expect(result).toHaveLength(8);
-        expect(result).toContain(path('/file1.txt'));
-        expect(result).toContain(path('/file2.txt'));
-        expect(result).toContain(path('/dir1/file3.txt'));
-        expect(result).toContain(path('/dir1/file4.txt'));
-        expect(result).toContain(path('/dir2/file5.txt'));
-        expect(result).toContain(path('/dir2/file6.txt'));
-        expect(result).toContain(path('/dir1/nested1/file7.txt'));
-        expect(result).toContain(path('/dir1/nested1/file8.txt'));
+        expect(result).toContainEqual(cData('/file1.txt'));
+        expect(result).toContainEqual(cData('/file2.txt'));
+        expect(result).toContainEqual(cData('/dir1/file3.txt'));
+        expect(result).toContainEqual(cData('/dir1/file4.txt'));
+        expect(result).toContainEqual(cData('/dir2/file5.txt'));
+        expect(result).toContainEqual(cData('/dir2/file6.txt'));
+        expect(result).toContainEqual(cData('/dir1/nested1/file7.txt'));
+        expect(result).toContainEqual(cData('/dir1/nested1/file8.txt'));
     });
 
+});
+
+describe('getTopFiles', () => {
+    test('get top files', () => {
+
+        const list: FileInfo[] = [
+            {
+                path: '/a',
+                lastModified: 0,
+                size: 10,
+            },
+            {
+                path: '/b',
+                lastModified: 0,
+                size: 20,
+            },
+            {
+                path: '/c',
+                lastModified: 0,
+                size: 30,
+            },
+            {
+                path: '/d',
+                lastModified: 0,
+                size: 40,
+            }
+        ];
+
+        const expected = [
+            {
+                path: '/d',
+                lastModified: 0,
+                size: 40,
+            },
+            {
+                path: '/c',
+                lastModified: 0,
+                size: 30,
+            },
+            {
+                path: '/b',
+                lastModified: 0,
+                size: 20,
+            }
+        ];
+
+        const result = getTopFiles(list , 3);
+        expect(result).toEqual(expected);
+    });
 });
