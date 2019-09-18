@@ -1,11 +1,16 @@
 import {FileData} from './types';
 import FileNode from './FileNode';
 import {
+    createAddEmptyDirectoryUpdater,
+    createAddFileUpdater,
+    createRemoveDirectoryUpdater,
+    createRemoveFileUpdater,
+    createSetDirectoryUpdater,
     DirectoryNodeMeta,
     DirectoryNodeMetaUpdater,
     emptyMeta,
     updateMetaData
-} from './metaDataUpdater';
+} from './metaDataUpdaters';
 
 interface IDirectoryTreeNode {
     readonly name: string;
@@ -17,50 +22,6 @@ interface IDirectoryTreeNode {
     removeDirectory(name: string): DirectoryNode;
     hasDirectory(name: string): boolean;
     hasDirectories(): boolean;
-}
-
-function createSetDirectoryUpdater(newDir: DirectoryNode, oldDir?: DirectoryNode): DirectoryNodeMetaUpdater {
-
-    const oldMeta: DirectoryNodeMeta = oldDir ? oldDir.meta : emptyMeta();
-
-    const plusOne = oldDir ? 0 : 1;
-    const sizeDiff = oldMeta.sizeInBytes - newDir.sizeInBytes;
-    const filesDiff = oldMeta.totalNumberOfFiles - newDir.totalNumberOfFiles;
-    const dirsDiff = oldMeta.totalNumberOfDirectories - newDir.totalNumberOfDirectories - plusOne;
-
-    return {
-        sizeInBytes: current => current.sizeInBytes - sizeDiff,
-        totalNumberOfFiles: current => current.totalNumberOfFiles - filesDiff,
-        totalNumberOfDirectories: current => current.totalNumberOfDirectories - dirsDiff
-    };
-}
-
-function createRemoveDirectoryUpdater(dirToRemove: DirectoryNode): DirectoryNodeMetaUpdater {
-    return {
-        sizeInBytes: current => current.sizeInBytes - dirToRemove.sizeInBytes,
-        totalNumberOfFiles: current => current.totalNumberOfFiles - dirToRemove.totalNumberOfFiles,
-        totalNumberOfDirectories: current => current.totalNumberOfDirectories - dirToRemove.totalNumberOfDirectories - 1
-    }
-}
-
-function createRemoveFileUpdater(fileToRemove: FileNode): DirectoryNodeMetaUpdater {
-    return {
-        sizeInBytes: current => current.sizeInBytes - fileToRemove.data.size,
-        totalNumberOfFiles: current => current.totalNumberOfFiles - 1
-    }
-}
-
-function createAddFileUpdater(newFile: FileNode): DirectoryNodeMetaUpdater {
-    return {
-        sizeInBytes: current => current.sizeInBytes + newFile.data.size,
-        totalNumberOfFiles: current => current.totalNumberOfFiles + 1
-    }
-}
-
-function createAddEmptyDirectoryUpdater(): DirectoryNodeMetaUpdater {
-    return {
-        totalNumberOfDirectories: current => current.totalNumberOfDirectories + 1
-    }
 }
 
 export default class DirectoryNode implements IDirectoryTreeNode {

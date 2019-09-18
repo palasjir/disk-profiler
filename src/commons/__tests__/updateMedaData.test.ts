@@ -2,7 +2,7 @@ import {
     DirectoryNodeMeta,
     DirectoryNodeMetaUpdater,
     updateMetaData
-} from '../metaDataUpdater';
+} from '../metaDataUpdaters';
 
 describe('updateMetaData', () => {
 
