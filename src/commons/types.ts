@@ -1,15 +1,6 @@
-export interface IDirectoryTree {
-    readonly stats: NodeStats;
-}
-
 export enum ToScannerMessageType {
     START='START'
     , CANCEL = 'CANCEL'
-}
-
-export interface ToScannerMessage {
-    readonly type: ToScannerMessageType;
-    readonly data?: ScanStartEventData;
 }
 
 export enum ToAppMessageType {
@@ -19,6 +10,18 @@ export enum ToAppMessageType {
     , UPDATED='UPDATED'
     , READY = 'READY'
     , ERROR='ERROR'
+}
+
+export enum ScanState {
+    NOT_STARTED
+    , SCAN_IN_PROGRESS
+    , CANCEL_IN_PROGRESS
+    , FINISHED
+}
+
+export interface ToScannerMessage {
+    readonly type: ToScannerMessageType;
+    readonly data?: ScanStartEventData;
 }
 
 export interface ToAppMessage {
@@ -32,14 +35,6 @@ export interface ScanStartEventData {
 
 export interface ScanResultData {
     readonly tree: NodeStats;
-
-}
-
-export enum ScanState {
-    NOT_STARTED
-    , SCAN_IN_PROGRESS
-    , CANCEL_IN_PROGRESS
-    , FINISHED
 }
 
 export interface SecondaryStats {
