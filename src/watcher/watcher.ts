@@ -2,6 +2,7 @@ import * as chokidar from 'chokidar';
 import * as FS from 'fs';
 import {FileData} from '../commons/types';
 import DirectoryTree from '../models/DirectoryTree';
+import {getStats} from '../utils/scanner';
 
 
 export interface WatcherOptions {
@@ -56,7 +57,7 @@ export function createDirectoryTreeWatcher(path: string, options?: WatcherOption
             }
         },
         onFileAdded(path: string): void {
-            const stats = FS.statSync(path);
+            const stats = getStats(path);
             const fileData = statsToFileData(stats);
 
             tree.addFile(path, fileData);
@@ -93,7 +94,7 @@ export function createFileWatcher(path: string, options: WatcherOptions) {
         .on('change', options.onFileChanged)
         .on('unlink', options.onFileRemoved)
         .on('ready', options.onReady)
-        .on('error', options.onError)
+        .on('error', options.onError);
 
     return watcher;
 }

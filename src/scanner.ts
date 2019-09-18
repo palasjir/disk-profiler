@@ -10,6 +10,7 @@ import {
 import {ipcRenderer} from 'electron';
 import {createDirectoryTreeWatcher} from './watcher/watcher';
 import DirectoryTree from './models/DirectoryTree';
+import * as util from 'lodash';
 
 let tree: DirectoryTree;
 let watcher: any;
@@ -43,7 +44,7 @@ function sendScanFinishedMsg(tree: DirectoryTree) {
     ipcRenderer.send(EVENT_MSG_TO_APP, msg);
 }
 
-function sendScanUpdatedMsg(tree: DirectoryTree) {
+const sendScanUpdatedMsg = util.debounce(function sendScanUpdatedMsg(tree: DirectoryTree) {
     const msg: ToAppMessage = {
         type: ToAppMessageType.UPDATED,
         data: {
@@ -55,7 +56,7 @@ function sendScanUpdatedMsg(tree: DirectoryTree) {
         }
     };
     ipcRenderer.send(EVENT_MSG_TO_APP, msg);
-}
+}, 1000);
 
 function sendScanError(e: any) {
     const toAppMessage = {

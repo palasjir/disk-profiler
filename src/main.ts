@@ -43,6 +43,7 @@ async function createMainWindow(scannerWindow: BrowserWindow): Promise<BrowserWi
      */
     function toApp(event: IpcMainEvent, msg: ToAppMessage): void {
         console.log(`Forwarding message to app: ${msg.type}.`);
+        console.dir(msg);
         mainWindow.webContents.send(EVENT_MSG_TO_APP, msg);
     }
 
