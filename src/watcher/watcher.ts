@@ -25,7 +25,8 @@ function statsToFileData(stats?: FS.Stats): FileInfo {
     }
     return {
         size: stats.size,
-        lastModified: stats.mtimeMs
+        lastModified: stats.mtimeMs,
+        lastModifiedFormated: stats.mtime
     }
 }
 

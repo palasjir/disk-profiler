@@ -50,6 +50,7 @@ export interface NodeStats extends SecondaryStats {
 export interface FileInfo {
     size: number;
     lastModified: number;
+    lastModifiedFormated?: Date;
     path?: string;
 }
 

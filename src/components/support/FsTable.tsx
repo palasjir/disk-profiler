@@ -26,7 +26,7 @@ export function FsNodeTable(props: FsNodeTableProps): JSX.Element | null {
                     <TableRow key={info.path}>
                         <TableCell component="th" scope="row">{info.path}</TableCell>
                         <TableCell>{formatSize(info.size)}</TableCell>
-                        <TableCell>{info.lastModified}</TableCell>
+                        <TableCell>{info.lastModifiedFormated}</TableCell>
                     </TableRow>
                 ))}
             </TableBody>

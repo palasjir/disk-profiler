@@ -46,7 +46,8 @@ export const ScanResults = observer(function ScanResult(): JSX.Element {
                                 </div>
                             </Grid>
                             <Grid item>
-                                <Button>Show all files</Button>
+                                {/* Todo: Load add ability to browse more than 100 files. */}
+                                <Button onClick={() => window.alert("Sorry! Lazy programmer haven't provided this yet.")}>Show more files</Button>
                             </Grid>
                         </Grid>
                     </Paper>
