@@ -1,6 +1,8 @@
 import DirectoryTree from '../DirectoryTree';
 import {FileData} from '../types';
-import DirectoryNode from '../DirectoryNode';
+
+const rootPath  = '/root/path';
+const defaultFileData: FileData = { size: 500, lastModified: 0};
 
 describe('DirectoryTree', () => {
 
@@ -24,7 +26,6 @@ describe('DirectoryTree', () => {
     describe('addDirectory', () => {
 
         test('adds directory', () => {
-            const rootPath  = '/root/path';
             const sut = new DirectoryTree(rootPath);
 
             sut.addEmptyDirectory(`${rootPath}/folder1`);
@@ -35,7 +36,6 @@ describe('DirectoryTree', () => {
         });
 
         test(`can't add the same directory twice`, () => {
-            const rootPath  = '/root/path';
             const sut = new DirectoryTree(rootPath);
 
             sut.addEmptyDirectory(`${rootPath}/folder1`);
@@ -46,7 +46,6 @@ describe('DirectoryTree', () => {
         });
 
         test(`adds directory with complex path`, () => {
-            const rootPath  = '/root/path';
             const sut = new DirectoryTree(rootPath);
 
             sut.addEmptyDirectory(`${rootPath}/folder1/folder1`);
@@ -60,7 +59,6 @@ describe('DirectoryTree', () => {
     describe('removeDirectory', () => {
 
         test('removes directory from structure', () => {
-            const rootPath  = '/root/path';
             const sut = new DirectoryTree(rootPath);
 
             sut.addFile(`${rootPath}/folder1/file1.txt`, { size: 500, lastModified: 0});
@@ -71,7 +69,6 @@ describe('DirectoryTree', () => {
         });
 
         test('removing directory updates size', () => {
-            const rootPath  = '/root/path';
             const sut = new DirectoryTree(rootPath);
 
             sut.addFile(`${rootPath}/folder1/file1.txt`, { size: 500, lastModified: 0});
@@ -86,7 +83,7 @@ describe('DirectoryTree', () => {
     describe('removeFile', () => {
 
         test('removes correct file from root', () => {
-            const rootPath  = '/root/path';
+            
             const sut = new DirectoryTree(rootPath);
 
             sut.addFile(`${rootPath}/file1.txt`, { size: 500, lastModified: 0});
@@ -98,6 +95,45 @@ describe('DirectoryTree', () => {
             expect(sut.head.getFile(`file1.txt`)).not.toBeDefined();
             expect(sut.head.getFile(`file2.txt`)).toBeDefined();
         });
+
+    });
+    
+    
+    describe('findDirectory', () => {
+       
+        test("gives correct directory when directory exists", () => {
+            const sut = new DirectoryTree(rootPath);
+            const folder = sut.addEmptyDirectory(`${rootPath}/folder`);
+            const found = sut.findDirectory(`${rootPath}/folder`);
+            expect(found).toBe(folder);
+        });
+        
+        test("gives null when directory doesn't exist", () => {
+            const sut = new DirectoryTree(rootPath);
+            const folder = sut.addEmptyDirectory(`${rootPath}/folder`);
+            const found = sut.findDirectory(`${rootPath}/nonExisting`);
+            expect(found).toBeNull();
+            expect(sut.head.getDirectory('folder')).toBe(folder)
+        })
+        
+    });
+
+    describe('findFile()', () => {
+
+        test("gives correct file when file exists", () => {
+            const sut = new DirectoryTree(rootPath);
+            const folder = sut.addEmptyDirectory(`${rootPath}/folder`);
+            const file = folder.addFile('file.txt', defaultFileData);
+            const found = sut.findFile(`${rootPath}/folder/file.txt`);
+            expect(found).toBe(file);
+        });
+
+        test("gives null when directory doesn't exist", () => {
+            const sut = new DirectoryTree(rootPath);
+            sut.addEmptyDirectory(`${rootPath}/folder`);
+            const found = sut.findFile(`${rootPath}/folder/nonExisting.txt`);
+            expect(found).toBeUndefined();
+        })
 
     });
 

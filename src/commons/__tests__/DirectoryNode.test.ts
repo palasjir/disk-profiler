@@ -53,6 +53,14 @@ describe('DirectoryNode', () => {
             directory.addFile('file3', defaultFileData);
             expect(sut.totalNumberOfFiles).toEqual(3);
         });
+
+        test('adding same file twice does not increase total number of files', () => {
+            const sut = new DirectoryNode('.');
+            sut.addFile('file1', defaultFileData);
+            expect(sut.totalNumberOfFiles).toEqual(1);
+            sut.addFile('file1', defaultFileData);
+            expect(sut.totalNumberOfFiles).toEqual(1);
+        });
     });
 
     describe('addDirectory', () => {
@@ -291,7 +299,7 @@ describe('DirectoryNode', () => {
     });
 
 
-    describe('remove file', () => {
+    describe('removeFile()', () => {
 
         test('removes existing file', () => {
             const sut = new DirectoryNode('.');
@@ -343,6 +351,37 @@ describe('DirectoryNode', () => {
             expect(sut.sizeInBytes).toEqual(1500);
             folder.removeFile('notExistingFile');
             expect(sut.sizeInBytes).toEqual(1500);
+        });
+
+        test('removing file updates total number of files in node', () => {
+            const sut = new DirectoryNode('.');
+            sut.addFile('file1', defaultFileData);
+            sut.addFile('file2', defaultFileData);
+
+            expect(sut.totalNumberOfFiles).toEqual(2);
+            sut.removeFile('file1');
+            expect(sut.totalNumberOfFiles).toEqual(1);
+        });
+
+        test('removing file non existing files does not update total number of files in node', () => {
+            const sut = new DirectoryNode('.');
+            sut.addFile('file1', defaultFileData);
+            sut.addFile('file2', defaultFileData);
+
+            expect(sut.totalNumberOfFiles).toEqual(2);
+            sut.removeFile('nonExisting');
+            expect(sut.totalNumberOfFiles).toEqual(2);
+        });
+
+        test('removing nested file update total number of files in root node', () => {
+            const sut = new DirectoryNode('.');
+            const nested = sut.addEmptyDirectory('nested');
+            nested.addFile('file1', defaultFileData);
+            nested.addFile('file2', defaultFileData);
+
+            expect(sut.totalNumberOfFiles).toEqual(2);
+            nested.removeFile('file1');
+            expect(sut.totalNumberOfFiles).toEqual(1);
         });
 
 

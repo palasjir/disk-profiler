@@ -30,13 +30,12 @@ export default class DirectoryTree {
         return pathWithoutRoot.split('/');
     }
 
-    public addEmptyDirectory(path: string): DirectoryTree {
+    public addEmptyDirectory(path: string): DirectoryNode {
         if(!this.hasSameRoot(path)){
-            return this;
+            return null;
         }
         const pathFragments = this.getPathFragments(path);
-        this.createDirectoryStructure(pathFragments);
-        return this;
+        return this.createDirectoryStructure(pathFragments);
     }
 
     public addFile(path: string, data: FileData): DirectoryTree {
@@ -68,20 +67,8 @@ export default class DirectoryTree {
         return this;
     }
 
-    suggestNextPath(path: string): string[] {
-        const lastCharacter = this.findDirectory(path);
-
-        if (!lastCharacter) {
-            return null;
-        }
-
-        return lastCharacter.suggestDirectories();
-    }
-
     public doesDirectoryExist(path: string): boolean {
-        const lastNode = this.findDirectory(path);
-
-        return !!lastNode;
+        return Boolean(this.findDirectory(path));
     }
 
     public findDirectory(path: string, returnParent?: boolean): DirectoryNode | null {
@@ -91,7 +78,7 @@ export default class DirectoryTree {
         const end = returnParent ? pathFragments.length - 1 : pathFragments.length;
 
         for (let charIndex = 0; charIndex < end; charIndex += 1) {
-            if (!currentNode.hasChild(pathFragments[charIndex])) {
+            if (!currentNode.hasDirectory(pathFragments[charIndex])) {
                 return null;
             }
 
@@ -102,7 +89,7 @@ export default class DirectoryTree {
     }
 
     public findFile(path: string): FileNode | null {
-        const containingDirectory = this.findDirectory(path);
+        const containingDirectory = this.findDirectory(path, true);
         if(!containingDirectory) {
             return null;
         }
@@ -120,9 +107,8 @@ export default class DirectoryTree {
         let currentNode = this.head;
 
         for (let pathFragmentIndex = 0; pathFragmentIndex < pathFragments.length; pathFragmentIndex += 1) {
-            const isComplete = pathFragmentIndex === pathFragments.length - 1;
             const pathFragment = pathFragments[pathFragmentIndex];
-            currentNode = currentNode.addEmptyDirectory(pathFragment, isComplete);
+            currentNode = currentNode.addEmptyDirectory(pathFragment);
         }
 
         return currentNode;

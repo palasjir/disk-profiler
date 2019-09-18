@@ -10,9 +10,8 @@ interface IDirectoryTreeNode {
     getDirectory(name: string): DirectoryNode;
     addEmptyDirectory(name: string, isCompleteWord: boolean, data: FileData): DirectoryNode;
     removeDirectory(name: string): DirectoryNode;
-    hasChild(name: string): boolean;
-    hasChildren(): boolean;
-    suggestDirectories(): string[];
+    hasDirectory(name: string): boolean;
+    hasDirectories(): boolean;
 }
 
 export default class DirectoryNode implements IDirectoryTreeNode {
@@ -26,25 +25,26 @@ export default class DirectoryNode implements IDirectoryTreeNode {
     private _totalNumberOfDirectories: number = 0;
     private _totalNumberOfFiles: number = 0;
 
-    constructor(name: string, isComplete: boolean = false, parent?: DirectoryNode | null) {
+    constructor(name: string, parent?: DirectoryNode | null) {
         this.name = name;
         this.parent = parent || null;
     }
 
-    getDirectory(name: string): DirectoryNode {
+    getDirectory(name: string): DirectoryNode | undefined {
         return this.directories.get(name);
     }
 
-    getFile(name: string): FileNode {
+    getFile(name: string): FileNode | undefined {
         return this.files.get(name);
     }
 
-    addEmptyDirectory(name: string, isComplete: boolean = false): DirectoryNode {
+    addEmptyDirectory(name: string): DirectoryNode {
         if (!this.directories.has(name)) {
-            const newNode = new DirectoryNode(name, isComplete, this);
+            const newNode = new DirectoryNode(name, this);
             const prev = this.totalNumberOfDirectories;
-            this._totalNumberOfDirectories += 1;
             this.directories.set(name, newNode);
+
+            this._totalNumberOfDirectories += 1;
             this.updateParentDirectoryNumber(prev);
         }
 
@@ -77,7 +77,10 @@ export default class DirectoryNode implements IDirectoryTreeNode {
         return node;
     }
 
-    public addFile(name: string, data: FileData): void {
+    public addFile(name: string, data: FileData): FileNode | null {
+        if(this.files.has(name)) {
+            return this.getFile(name);
+        }
         const newNode = new FileNode(name, data);
         let prevSize = this._sizeInBytes;
         let prevNumber = this.totalNumberOfFiles;
@@ -88,16 +91,26 @@ export default class DirectoryNode implements IDirectoryTreeNode {
 
         this.updateParentSize(prevSize);
         this.updateParentFileNumber(prevNumber);
+
+        return this.getFile(name);
     }
 
-    public removeFile(name: string): void {
-        const toRemove = this.files.get(name);
-        if(toRemove) {
-            const prevSize = this.sizeInBytes;
-            this._sizeInBytes -= toRemove.data.size;
-            this.files.delete(name);
-            this.updateParentSize(prevSize);
+    public removeFile(name: string): FileNode | null {
+        const toRemove = this.getFile(name);
+        if(!toRemove) {
+            return null
         }
+
+        const prevSize = this.sizeInBytes;
+        this._sizeInBytes -= toRemove.data.size;
+        const prevFiles = this.totalNumberOfFiles;
+        this._totalNumberOfFiles -= 1;
+        this.files.delete(name);
+
+        this.updateParentSize(prevSize);
+        this.updateParentFileNumber(prevFiles);
+
+        return toRemove;
     }
 
     private updateParentDirectoryNumber(prev: number) {
@@ -187,16 +200,12 @@ export default class DirectoryNode implements IDirectoryTreeNode {
         return childNode;
     }
 
-    hasChild(name: string): boolean {
+    public hasDirectory(name: string): boolean {
         return this.directories.has(name);
     }
 
-    hasChildren(): boolean {
+    public hasDirectories(): boolean {
         return this.directories.size !== 0;
-    }
-
-    suggestDirectories(): string[] {
-        return [...this.directories.keys()];
     }
 
     public getNumberOfFiles() {
