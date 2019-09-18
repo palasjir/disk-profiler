@@ -35,6 +35,24 @@ describe('DirectoryNode', () => {
             });
             expect(sut.sizeInBytes).toEqual(5000);
         });
+
+        test('adding file updates total number of files', () => {
+            const sut = new DirectoryNode('.');
+            expect(sut.totalNumberOfFiles).toEqual(0);
+            sut.addFile('file1', defaultFileData);
+            expect(sut.totalNumberOfFiles).toEqual(1);
+        });
+
+        test('adding file updates total number of files in parent', () => {
+            const sut = new DirectoryNode('.');
+            sut.addFile('file1', defaultFileData);
+            sut.addFile('file2', defaultFileData);
+
+            const directory = sut.addEmptyDirectory('folder');
+            expect(sut.totalNumberOfFiles).toEqual(2);
+            directory.addFile('file3', defaultFileData);
+            expect(sut.totalNumberOfFiles).toEqual(3);
+        });
     });
 
     describe('addDirectory', () => {
@@ -46,6 +64,21 @@ describe('DirectoryNode', () => {
 
             sut.addEmptyDirectory('folder2');
             expect(sut.getNumberOfDirectories()).toEqual(2);
+        });
+
+        test('adding directory updates total number of directories', () => {
+            const sut = new DirectoryNode('.');
+            expect(sut.totalNumberOfDirectories).toEqual(0);
+            sut.addEmptyDirectory('folder');
+            expect(sut.totalNumberOfDirectories).toEqual(1);
+        });
+
+        test('adding directory updates total number of directories of parent', () => {
+            const sut = new DirectoryNode('.');
+            const folder = sut.addEmptyDirectory('folder1');
+            expect(sut.totalNumberOfDirectories).toEqual(1);
+            folder.addEmptyDirectory('folder2');
+            expect(sut.totalNumberOfDirectories).toEqual(2);
         });
     });
 
@@ -149,6 +182,26 @@ describe('DirectoryNode', () => {
             expect(sut.sizeInBytes).toEqual(2000);
         });
 
+        test('setting directory updates number of files and folder', () => {
+            const sut = new DirectoryNode('.');
+            sut.addFile('file1', defaultFileData);
+            sut.addEmptyDirectory('folder1');
+            sut.addEmptyDirectory('folder2');
+
+            expect(sut.totalNumberOfDirectories).toEqual(2);
+            expect(sut.totalNumberOfFiles).toEqual(1);
+
+            const folder3 = new DirectoryNode('folder3');
+            folder3.addFile('file1', defaultFileData);
+            folder3.addFile('file2', defaultFileData);
+            folder3.addEmptyDirectory('folder3');
+
+            sut.setDirectory('folder3', folder3);
+
+            expect(sut.totalNumberOfFiles).toEqual(3);
+            expect(sut.totalNumberOfDirectories).toEqual(4);
+        });
+
     });
 
     describe('removeDirectory', () => {
@@ -164,9 +217,77 @@ describe('DirectoryNode', () => {
             expect(sut.getDirectory('folder2')).toBeDefined();
         });
 
-        test('removing directory with files updates size', () => {
+        test('removing non existing directory doesnt cause the side effect', () => {
+            const sut = new DirectoryNode('.');
+            sut.addEmptyDirectory('folder1');
+            expect(sut.getDirectory('folder1')).toBeDefined();
 
+            sut.removeDirectory('folder2');
+            expect(sut.getDirectory('folder1')).toBeDefined();
+        });
+
+        test('removing directory with files updates size', () => {
+            const sut = new DirectoryNode('.');
+            sut.addFile('file1', defaultFileData);
+            const folder1 =  sut.addEmptyDirectory('folder1');
+            folder1.addFile('file1', defaultFileData);
+            folder1.addFile('file2', defaultFileData);
+
+            expect(sut.sizeInBytes).toEqual(1500);
+
+            sut.removeDirectory('folder1');
+            expect(sut.sizeInBytes).toEqual(500);
+        });
+
+        test('removing nested directory with files updates size', () => {
+            const sut = new DirectoryNode('.');
+            sut.addFile('file1', defaultFileData);
+            const folder1 =  sut.addEmptyDirectory('folder1');
+            const nested = folder1.addEmptyDirectory('nested');
+            nested.addFile('file1', defaultFileData);
+            nested.addFile('file2', defaultFileData);
+
+            expect(sut.sizeInBytes).toEqual(1500);
+
+            folder1.removeDirectory('nested');
+            expect(sut.sizeInBytes).toEqual(500);
+        });
+
+        test('removing directory updates number of files and directories', () => {
+            const sut = new DirectoryNode('.');
+            sut.addFile('file1', defaultFileData);
+            const folder = sut.addEmptyDirectory('folder1');
+            folder.addFile('file1', defaultFileData);
+            folder.addFile('file2', defaultFileData);
+
+            expect(sut.totalNumberOfFiles).toEqual(3);
+            expect(sut.totalNumberOfDirectories).toEqual(1);
+
+            sut.removeDirectory('folder1');
+
+            expect(sut.totalNumberOfFiles).toEqual(1);
+            expect(sut.totalNumberOfDirectories).toEqual(0);
+        });
+
+        test('removing nested directory updates number of files and directories in root', () => {
+            const sut = new DirectoryNode('.');
+            sut.addFile('file1', defaultFileData);
+            const folder = sut.addEmptyDirectory('folder1');
+            folder.addFile('file1', defaultFileData);
+            folder.addFile('file2', defaultFileData);
+            const nested = folder.addEmptyDirectory('nested');
+            nested.addFile('file1', defaultFileData);
+            nested.addFile('file2', defaultFileData);
+
+            expect(sut.totalNumberOfFiles).toEqual(5);
+            expect(sut.totalNumberOfDirectories).toEqual(2);
+
+            folder.removeDirectory('nested');
+
+            expect(sut.totalNumberOfFiles).toEqual(3);
+            expect(sut.totalNumberOfDirectories).toEqual(1);
         })
+
     });
 
 
