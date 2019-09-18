@@ -4,19 +4,19 @@ export enum ToScannerMessageType {
 }
 
 export enum ToAppMessageType {
-    STARTED='STARTED'
-    , FINISHED='FINISHED'
-    , CANCEL_IN_PROGRESS='CANCEL_IN_PROGRESS'
-    , UPDATED='UPDATED'
+    STARTED = 'STARTED'
+    , FINISHED = 'FINISHED'
+    , CANCEL_IN_PROGRESS = 'CANCEL_IN_PROGRESS'
+    , UPDATED = 'UPDATED'
     , READY = 'READY'
-    , ERROR='ERROR'
+    , ERROR = 'ERROR'
 }
 
 export enum ScanState {
-    NOT_STARTED
-    , SCAN_IN_PROGRESS
-    , CANCEL_IN_PROGRESS
-    , FINISHED
+    NOT_STARTED = 'NOT_STARTED'
+    , SCAN_IN_PROGRESS = 'SCAN_IN_PROGRESS'
+    , CANCEL_IN_PROGRESS = 'CANCEL_IN_PROGRESS'
+    , FINISHED = 'FINISHED'
 }
 
 export interface ToScannerMessage {
