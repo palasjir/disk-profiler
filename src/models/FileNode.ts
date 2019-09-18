@@ -1,4 +1,4 @@
-import {FileData} from './types';
+import {FileData} from '../commons/types';
 
 export default class FileNode {
     name: string;

@@ -1,5 +1,5 @@
-import {createDirectoryTreeWatcher, createFileWatcher, WatcherOptions} from '../src/commons/watcher';
-import {formatSize} from '../src/commons/formatSize';
+import {createDirectoryTreeWatcher, WatcherOptions} from '../src/commons/watcher';
+import {formatSize} from '../src/utils/format';
 
 const pathToScan1 = "/Users/jirpal/Downloads/skolka-praminek";
 const pathToScan2 = "/Users/jirpal/dev/skolka-praminek";

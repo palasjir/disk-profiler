@@ -1,6 +1,8 @@
-import styled from 'styled-components';
 import * as React from 'react';
-import {formatSize} from '../commons/formatSize';
+import styled from 'styled-components';
+
+import {formatSize} from '../utils/format';
+
 
 interface ScanResultsStatsProps {
     readonly sizeInBytes: number;

@@ -8,27 +8,12 @@ import {
 } from './commons/types';
 
 import {ipcRenderer} from 'electron';
-import DirectoryTree from './commons/DirectoryTree';
 import {createDirectoryTreeWatcher} from './commons/watcher';
+import DirectoryTree from './models/DirectoryTree';
 
 let tree: DirectoryTree;
 let watcher: any;
 let canSendUpdates = false;
-
-// function addToTop10(current: FileData[], candidate: FileData) {
-//     if(current.length < 1) {
-//         current.push(candidate);
-//     }
-//     const index = current.findIndex(node => candidate.size >= node.size);
-//     if(index === -1 && current.length < 10) {
-//         current.push(candidate);
-//     } else {
-//         current.splice(index, 0, candidate);
-//     }
-//     if(current.length > 10) {
-//         current.pop();
-//     }
-// }
 
 function sendScannerReadyMsg() {
     const msg: ToAppMessage = {

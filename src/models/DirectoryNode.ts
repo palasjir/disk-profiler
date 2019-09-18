@@ -1,16 +1,13 @@
-import {FileData} from './types';
+import {DirInfo, FileData} from '../commons/types';
 import FileNode from './FileNode';
 import {
     createAddEmptyDirectoryUpdater,
     createAddFileUpdater,
     createRemoveDirectoryUpdater,
     createRemoveFileUpdater,
-    createSetDirectoryUpdater,
-    DirectoryNodeMeta,
-    DirectoryNodeMetaUpdater,
-    emptyMeta,
-    updateMetaData
-} from './metaDataUpdaters';
+    createSetDirectoryUpdater, DirInfoUpdater,
+    emptyMeta, updateDirInfo,
+} from './DirInfoUpdater';
 
 export default class DirectoryNode {
 
@@ -19,7 +16,7 @@ export default class DirectoryNode {
     readonly files: Map<string, FileNode> = new Map();
 
     parent: DirectoryNode = null;
-    meta: DirectoryNodeMeta = emptyMeta();
+    dirInfo: DirInfo = emptyMeta();
 
     constructor(name: string, parent?: DirectoryNode | null) {
         this.name = name;
@@ -42,7 +39,7 @@ export default class DirectoryNode {
         const newDir = new DirectoryNode(name, this);
         this.directories.set(name, newDir);
 
-        this.updateMeta(createAddEmptyDirectoryUpdater());
+        this.updateDirInfoUp(createAddEmptyDirectoryUpdater());
 
         return newDir;
     }
@@ -58,7 +55,7 @@ export default class DirectoryNode {
         this.directories.set(name, newDir);
         newDir.parent = this;
 
-        this.updateMeta(createSetDirectoryUpdater(newDir, oldDir));
+        this.updateDirInfoUp(createSetDirectoryUpdater(newDir, oldDir));
 
         return newDir;
     }
@@ -69,7 +66,7 @@ export default class DirectoryNode {
         }
         const newFile = new FileNode(name, data);
         this.files.set(name, newFile);
-        this.updateMeta(createAddFileUpdater(newFile));
+        this.updateDirInfoUp(createAddFileUpdater(newFile));
 
         return this.getFile(name);
     }
@@ -78,7 +75,7 @@ export default class DirectoryNode {
         const fileToRemove = this.getFile(name);
         if(!fileToRemove) return undefined;
 
-        this.updateMeta(createRemoveFileUpdater(fileToRemove));
+        this.updateDirInfoUp(createRemoveFileUpdater(fileToRemove));
 
         this.files.delete(name);
 
@@ -98,7 +95,7 @@ export default class DirectoryNode {
         }
 
         this.directories.delete(name);
-        this.updateMeta(createRemoveDirectoryUpdater(dirToRemove));
+        this.updateDirInfoUp(createRemoveDirectoryUpdater(dirToRemove));
         return dirToRemove;
     }
 
@@ -119,21 +116,21 @@ export default class DirectoryNode {
     }
 
     public get sizeInBytes(): number {
-        return this.meta.sizeInBytes;
+        return this.dirInfo.sizeInBytes;
     }
 
     public get totalNumberOfFiles(): number {
-        return this.meta.totalNumberOfFiles;
+        return this.dirInfo.totalNumberOfFiles;
     }
 
     public get totalNumberOfDirectories(): number {
-        return this.meta.totalNumberOfDirectories;
+        return this.dirInfo.totalNumberOfDirectories;
     }
 
-    private updateMeta(updater: DirectoryNodeMetaUpdater): void {
+    private updateDirInfoUp(updater: DirInfoUpdater): void {
         let currentNode: DirectoryNode = this;
         while(currentNode != null) {
-            currentNode.meta = updateMetaData(currentNode.meta, updater);
+            currentNode.dirInfo = updateDirInfo(currentNode.dirInfo, updater);
             currentNode = currentNode.parent;
         }
     }

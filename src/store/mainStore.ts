@@ -10,7 +10,7 @@ import {
 } from '../commons/types';
 import {action, computed, IObservableArray, observable} from 'mobx';
 import {EVENT_MSG_TO_APP, EVENT_MSG_TO_SCANNER} from '../commons/constants';
-import FileNode from '../commons/FileNode';
+import FileNode from '../models/FileNode';
 
 async function openSelectDirectoryDialog(): Promise<OpenDialogReturnValue> {
     return remote.dialog.showOpenDialog({ properties: ['openDirectory'] })

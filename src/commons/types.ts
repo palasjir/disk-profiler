@@ -62,3 +62,9 @@ export interface FileData {
     lastModified: number;
     path?: number;
 }
+
+export interface DirInfo {
+    totalNumberOfDirectories: number;
+    totalNumberOfFiles: number;
+    sizeInBytes: number;
+}

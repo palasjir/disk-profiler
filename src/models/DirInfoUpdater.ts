@@ -1,21 +1,8 @@
-import FileNode from './FileNode';
 import DirectoryNode from './DirectoryNode';
+import FileNode from './FileNode';
+import {DirInfo} from '../commons/types';
 
-type UpdaterFunction<T> = (current: DirectoryNodeMeta) => T;
-
-export interface DirectoryNodeMetaUpdater {
-    totalNumberOfDirectories?: UpdaterFunction<number>;
-    totalNumberOfFiles?: UpdaterFunction<number>;
-    sizeInBytes?: UpdaterFunction<number>;
-}
-
-export interface DirectoryNodeMeta {
-    totalNumberOfDirectories: number;
-    totalNumberOfFiles: number;
-    sizeInBytes: number;
-}
-
-export function emptyMeta(): DirectoryNodeMeta {
+export function emptyMeta(): DirInfo {
     return {
         totalNumberOfDirectories: 0,
         totalNumberOfFiles: 0,
@@ -23,13 +10,21 @@ export function emptyMeta(): DirectoryNodeMeta {
     }
 }
 
+export type DirInfoUpdaterFn<T> = (current: DirInfo) => T;
 
-export function updateMetaData(oldValue: DirectoryNodeMeta, updater?: DirectoryNodeMetaUpdater): DirectoryNodeMeta {
+export interface DirInfoUpdater {
+    totalNumberOfDirectories?: DirInfoUpdaterFn<number>;
+    totalNumberOfFiles?: DirInfoUpdaterFn<number>;
+    sizeInBytes?: DirInfoUpdaterFn<number>;
+}
+
+
+export function updateDirInfo(oldValue: DirInfo, updater?: DirInfoUpdater): DirInfo {
     if(!updater) return  oldValue;
-    const updates: DirectoryNodeMeta = {...oldValue};
+    const updates: DirInfo = {...oldValue};
     for(const key in updater) {
         if(oldValue.hasOwnProperty(key)) {
-            const _key = key as keyof DirectoryNodeMeta;
+            const _key = key as keyof DirInfo;
             const valueUpdater = updater[_key];
             updates[_key] = valueUpdater(oldValue);
         }
@@ -37,9 +32,10 @@ export function updateMetaData(oldValue: DirectoryNodeMeta, updater?: DirectoryN
     return updates;
 }
 
-export function createSetDirectoryUpdater(newDir: DirectoryNode, oldDir?: DirectoryNode): DirectoryNodeMetaUpdater {
 
-    const oldMeta: DirectoryNodeMeta = oldDir ? oldDir.meta : emptyMeta();
+export function createSetDirectoryUpdater(newDir: DirectoryNode, oldDir?: DirectoryNode): DirInfoUpdater {
+
+    const oldMeta: DirInfo = oldDir ? oldDir.dirInfo : emptyMeta();
 
     const plusOne = oldDir ? 0 : 1;
     const sizeDiff = oldMeta.sizeInBytes - newDir.sizeInBytes;
@@ -53,7 +49,7 @@ export function createSetDirectoryUpdater(newDir: DirectoryNode, oldDir?: Direct
     };
 }
 
-export function createRemoveDirectoryUpdater(dirToRemove: DirectoryNode): DirectoryNodeMetaUpdater {
+export function createRemoveDirectoryUpdater(dirToRemove: DirectoryNode): DirInfoUpdater {
     return {
         sizeInBytes: current => current.sizeInBytes - dirToRemove.sizeInBytes,
         totalNumberOfFiles: current => current.totalNumberOfFiles - dirToRemove.totalNumberOfFiles,
@@ -61,21 +57,21 @@ export function createRemoveDirectoryUpdater(dirToRemove: DirectoryNode): Direct
     }
 }
 
-export function createRemoveFileUpdater(fileToRemove: FileNode): DirectoryNodeMetaUpdater {
+export function createRemoveFileUpdater(fileToRemove: FileNode): DirInfoUpdater {
     return {
         sizeInBytes: current => current.sizeInBytes - fileToRemove.data.size,
         totalNumberOfFiles: current => current.totalNumberOfFiles - 1
     }
 }
 
-export function createAddFileUpdater(newFile: FileNode): DirectoryNodeMetaUpdater {
+export function createAddFileUpdater(newFile: FileNode): DirInfoUpdater {
     return {
         sizeInBytes: current => current.sizeInBytes + newFile.data.size,
         totalNumberOfFiles: current => current.totalNumberOfFiles + 1
     }
 }
 
-export function createAddEmptyDirectoryUpdater(): DirectoryNodeMetaUpdater {
+export function createAddEmptyDirectoryUpdater(): DirInfoUpdater {
     return {
         totalNumberOfDirectories: current => current.totalNumberOfDirectories + 1
     }

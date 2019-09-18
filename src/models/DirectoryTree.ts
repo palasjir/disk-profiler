@@ -1,8 +1,8 @@
 // Character that we will use for trie tree root.
 import DirectoryNode from './DirectoryNode';
-import {FileData} from './types';
 import FileNode from './FileNode';
-import {normalizePath} from './scannerUtils';
+import {fragmentizePath} from '../utils/path';
+import {FileData} from '../commons/types';
 
 const HEAD_CHARACTER = '.';
 
@@ -20,14 +20,8 @@ export default class DirectoryTree {
         return path.startsWith(this.rootPath);
     }
 
-    public removeRootPath(path: string) {
-        return path.trim().slice(this.rootPath.length);
-    }
-
-    public getPathFragments(path: string): string[] {
-        const normalizedPath = normalizePath(path);
-        const pathWithoutRoot = this.removeRootPath(normalizedPath);
-        return pathWithoutRoot.split('/');
+    public getPathFragments(path: string) {
+        return fragmentizePath(this.rootPath, path);
     }
 
     public addEmptyDirectory(path: string): DirectoryNode {

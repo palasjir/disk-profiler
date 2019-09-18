@@ -1,5 +1,5 @@
 import DirectoryTree from '../DirectoryTree';
-import {FileData} from '../types';
+import {FileData} from '../../commons/types';
 
 const rootPath  = '/root/path';
 const defaultFileData: FileData = { size: 500, lastModified: 0};

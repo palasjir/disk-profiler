@@ -1,7 +1,7 @@
 import * as chokidar from 'chokidar';
 import * as FS from 'fs';
 import {FileData} from './types';
-import DirectoryTree from './DirectoryTree';
+import DirectoryTree from '../models/DirectoryTree';
 
 
 export interface WatcherOptions {

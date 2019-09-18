@@ -1,5 +1,5 @@
 import DirectoryNode from '../DirectoryNode';
-import {FileData} from '../types';
+import {FileData} from '../../commons/types';
 
 const defaultFileData: FileData = {size: 500, lastModified: 0};
 
