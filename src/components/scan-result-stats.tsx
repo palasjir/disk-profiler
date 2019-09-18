@@ -29,8 +29,6 @@ const StyledSecondaryStat = styled.div`
       color: rgba(0, 0, 0, 0.4);
 `;
 
-
-
 export const ScanResultsStats = function ScanResultsStats(props: ScanResultsStatsProps) {
     return(
         <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center'}}>

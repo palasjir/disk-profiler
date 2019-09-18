@@ -190,7 +190,7 @@ describe('DirectoryNode', () => {
             expect(sut.sizeInBytes).toEqual(2000);
         });
 
-        test('setting directory updates number of files and folder', () => {
+        test('setting not existing directory updates number of files and folder', () => {
             const sut = new DirectoryNode('.');
             sut.addFile('file1', defaultFileData);
             sut.addEmptyDirectory('folder1');
@@ -202,12 +202,35 @@ describe('DirectoryNode', () => {
             const folder3 = new DirectoryNode('folder3');
             folder3.addFile('file1', defaultFileData);
             folder3.addFile('file2', defaultFileData);
-            folder3.addEmptyDirectory('folder3');
+            folder3.addEmptyDirectory('folder4');
+            folder3.addEmptyDirectory('folder5');
 
             sut.setDirectory('folder3', folder3);
 
             expect(sut.totalNumberOfFiles).toEqual(3);
-            expect(sut.totalNumberOfDirectories).toEqual(4);
+            expect(sut.totalNumberOfDirectories).toEqual(5);
+        });
+
+        test('setting existing directory updates number of files and folder', () => {
+            const sut = new DirectoryNode('.');
+            sut.addFile('file1', defaultFileData);
+            sut.addEmptyDirectory('folder1');
+            sut.addEmptyDirectory('folder2');
+            sut.addEmptyDirectory('folder3');
+
+            expect(sut.totalNumberOfDirectories).toEqual(3);
+            expect(sut.totalNumberOfFiles).toEqual(1);
+
+            const folder3 = new DirectoryNode('folder3');
+            folder3.addFile('file1', defaultFileData);
+            folder3.addFile('file2', defaultFileData);
+            folder3.addEmptyDirectory('folder4');
+            folder3.addEmptyDirectory('folder5');
+
+            sut.setDirectory('folder3', folder3);
+
+            expect(sut.totalNumberOfFiles).toEqual(3);
+            expect(sut.totalNumberOfDirectories).toEqual(5);
         });
 
     });

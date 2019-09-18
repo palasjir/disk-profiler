@@ -1,6 +1,11 @@
 import {FileData} from './types';
 import FileNode from './FileNode';
-
+import {
+    DirectoryNodeMeta,
+    DirectoryNodeMetaUpdater,
+    emptyMeta,
+    updateMetaData
+} from './metaDataUpdater';
 
 interface IDirectoryTreeNode {
     readonly name: string;
@@ -14,16 +19,58 @@ interface IDirectoryTreeNode {
     hasDirectories(): boolean;
 }
 
+function createSetDirectoryUpdater(newDir: DirectoryNode, oldDir?: DirectoryNode): DirectoryNodeMetaUpdater {
+
+    const oldMeta: DirectoryNodeMeta = oldDir ? oldDir.meta : emptyMeta();
+
+    const plusOne = oldDir ? 0 : 1;
+    const sizeDiff = oldMeta.sizeInBytes - newDir.sizeInBytes;
+    const filesDiff = oldMeta.totalNumberOfFiles - newDir.totalNumberOfFiles;
+    const dirsDiff = oldMeta.totalNumberOfDirectories - newDir.totalNumberOfDirectories - plusOne;
+
+    return {
+        sizeInBytes: current => current.sizeInBytes - sizeDiff,
+        totalNumberOfFiles: current => current.totalNumberOfFiles - filesDiff,
+        totalNumberOfDirectories: current => current.totalNumberOfDirectories - dirsDiff
+    };
+}
+
+function createRemoveDirectoryUpdater(dirToRemove: DirectoryNode): DirectoryNodeMetaUpdater {
+    return {
+        sizeInBytes: current => current.sizeInBytes - dirToRemove.sizeInBytes,
+        totalNumberOfFiles: current => current.totalNumberOfFiles - dirToRemove.totalNumberOfFiles,
+        totalNumberOfDirectories: current => current.totalNumberOfDirectories - dirToRemove.totalNumberOfDirectories - 1
+    }
+}
+
+function createRemoveFileUpdater(fileToRemove: FileNode): DirectoryNodeMetaUpdater {
+    return {
+        sizeInBytes: current => current.sizeInBytes - fileToRemove.data.size,
+        totalNumberOfFiles: current => current.totalNumberOfFiles - 1
+    }
+}
+
+function createAddFileUpdater(newFile: FileNode): DirectoryNodeMetaUpdater {
+    return {
+        sizeInBytes: current => current.sizeInBytes + newFile.data.size,
+        totalNumberOfFiles: current => current.totalNumberOfFiles + 1
+    }
+}
+
+function createAddEmptyDirectoryUpdater(): DirectoryNodeMetaUpdater {
+    return {
+        totalNumberOfDirectories: current => current.totalNumberOfDirectories + 1
+    }
+}
+
 export default class DirectoryNode implements IDirectoryTreeNode {
 
     readonly name: string;
     readonly directories: Map<string, DirectoryNode> = new Map();
     readonly files: Map<string, FileNode> = new Map();
-    private _sizeInBytes: number = 0;
-    parent: DirectoryNode = null;
 
-    private _totalNumberOfDirectories: number = 0;
-    private _totalNumberOfFiles: number = 0;
+    parent: DirectoryNode = null;
+    meta: DirectoryNodeMeta = emptyMeta();
 
     constructor(name: string, parent?: DirectoryNode | null) {
         this.name = name;
@@ -39,78 +86,54 @@ export default class DirectoryNode implements IDirectoryTreeNode {
     }
 
     public addEmptyDirectory(name: string): DirectoryNode {
-        if (!this.directories.has(name)) {
-            const newNode = new DirectoryNode(name, this);
-            const prev = this.totalNumberOfDirectories;
-            this.directories.set(name, newNode);
-
-            this._totalNumberOfDirectories += 1;
-            this.updateParentDirectoryNumber(prev);
+        if (this.directories.has(name)) {
+            return this.directories.get(name);
         }
 
-        return this.directories.get(name);
+        const newDir = new DirectoryNode(name, this);
+        this.directories.set(name, newDir);
+
+        this.updateMeta(createAddEmptyDirectoryUpdater());
+
+        return newDir;
     }
 
-    public setDirectory(name: string, node: DirectoryNode): DirectoryNode | null {
-        if(name !== node.name) {
+    public setDirectory(name: string, newDir: DirectoryNode): DirectoryNode | null {
+        if(name !== newDir.name) {
             // consistency check
             return null;
         }
-        const prevSize = this.sizeInBytes;
-        const prevFiles = this._totalNumberOfFiles;
-        const prevDirs = this._totalNumberOfDirectories;
-        if(this.directories.has(name)) {
-            const childNode = this.getDirectory(name);
-            this._sizeInBytes -= childNode.sizeInBytes;
-        }
-        this.directories.set(name, node);
-        node.parent = this;
 
-        this._sizeInBytes += node.sizeInBytes;
-        this._totalNumberOfDirectories = this.directories.size + node.totalNumberOfDirectories;
-        this._totalNumberOfFiles = this.files.size + node.totalNumberOfFiles;
+        const oldDir = this.getDirectory(name);
 
-        this.updateParentSize(prevSize);
-        this.updateParentFileNumber(prevFiles);
-        this.updateParentDirectoryNumber(prevDirs);
+        this.directories.set(name, newDir);
+        newDir.parent = this;
 
-        return node;
+        this.updateMeta(createSetDirectoryUpdater(newDir, oldDir));
+
+        return newDir;
     }
 
-    public addFile(name: string, data: FileData): FileNode | null {
+    public addFile(name: string, data: FileData): FileNode | undefined {
         if(this.files.has(name)) {
             return this.getFile(name);
         }
-        const newNode = new FileNode(name, data);
-        let prevSize = this._sizeInBytes;
-        let prevNumber = this.totalNumberOfFiles;
-        this._sizeInBytes += data.size;
-        this._totalNumberOfFiles += 1;
-
-        this.files.set(name, newNode);
-
-        this.updateParentSize(prevSize);
-        this.updateParentFileNumber(prevNumber);
+        const newFile = new FileNode(name, data);
+        this.files.set(name, newFile);
+        this.updateMeta(createAddFileUpdater(newFile));
 
         return this.getFile(name);
     }
 
     public removeFile(name: string): FileNode | undefined {
-        const toRemove = this.getFile(name);
-        if(!toRemove) {
-            return undefined;
-        }
+        const fileToRemove = this.getFile(name);
+        if(!fileToRemove) return undefined;
 
-        const prevSize = this.sizeInBytes;
-        this._sizeInBytes -= toRemove.data.size;
-        const prevFiles = this.totalNumberOfFiles;
-        this._totalNumberOfFiles -= 1;
+        this.updateMeta(createRemoveFileUpdater(fileToRemove));
+
         this.files.delete(name);
 
-        this.updateParentSize(prevSize);
-        this.updateParentFileNumber(prevFiles);
-
-        return toRemove;
+        return fileToRemove;
     }
 
     /**
@@ -120,24 +143,14 @@ export default class DirectoryNode implements IDirectoryTreeNode {
      * @return removed directory or undefined when there is nothing to remove
      */
     public removeDirectory(name: string): DirectoryNode | undefined {
-        const childNode = this.getDirectory(name);
-        if(!childNode){
+        const dirToRemove = this.getDirectory(name);
+        if(!dirToRemove){
             return undefined;
         }
 
         this.directories.delete(name);
-        const prevSize = this.sizeInBytes;
-        this._sizeInBytes -= childNode._sizeInBytes;
-        const prevNumOfDirs = this.totalNumberOfDirectories;
-        this._totalNumberOfDirectories -= (childNode.totalNumberOfDirectories + 1);
-        const prevNumOfFiles = this.totalNumberOfFiles;
-        this._totalNumberOfFiles -= childNode.totalNumberOfFiles;
-
-        this.updateParentDirectoryNumber(prevNumOfDirs);
-        this.updateParentFileNumber(prevNumOfFiles);
-        this.updateParentSize(prevSize);
-
-        return childNode;
+        this.updateMeta(createRemoveDirectoryUpdater(dirToRemove));
+        return dirToRemove;
     }
 
     public hasDirectory(name: string): boolean {
@@ -157,74 +170,22 @@ export default class DirectoryNode implements IDirectoryTreeNode {
     }
 
     public get sizeInBytes(): number {
-        return this._sizeInBytes;
+        return this.meta.sizeInBytes;
     }
 
     public get totalNumberOfFiles(): number {
-        return this._totalNumberOfFiles;
+        return this.meta.totalNumberOfFiles;
     }
 
     public get totalNumberOfDirectories(): number {
-        return this._totalNumberOfDirectories;
+        return this.meta.totalNumberOfDirectories;
     }
 
-    private updateParentDirectoryNumber(prev: number) {
-        if(prev === this.totalNumberOfDirectories){
-            // no need to update parents
-            return;
-        }
-
+    private updateMeta(updater: DirectoryNodeMetaUpdater): void {
         let currentNode: DirectoryNode = this;
-        let currentParent: DirectoryNode = this.parent;
-
-        while(currentParent != null) {
-            let currentParentPrevSize = currentParent.totalNumberOfDirectories;
-            currentParent._totalNumberOfDirectories -= prev;
-            prev = currentParentPrevSize;
-            currentParent._totalNumberOfDirectories += currentNode.totalNumberOfDirectories;
-
-            currentNode = currentParent;
-            currentParent = currentParent.parent;
-        }
-    }
-
-    private updateParentFileNumber(prev: number) {
-        if(prev === this.totalNumberOfFiles){
-            // no need to update parents
-            return;
-        }
-
-        let currentNode: DirectoryNode = this;
-        let currentParent: DirectoryNode = this.parent;
-
-        while(currentParent != null) {
-            let currentParentPrevSize = currentParent.totalNumberOfFiles;
-            currentParent._totalNumberOfFiles -= prev;
-            prev = currentParentPrevSize;
-            currentParent._totalNumberOfFiles += currentNode.totalNumberOfFiles;
-
-            currentNode = currentParent;
-            currentParent = currentParent.parent;
-        }
-    }
-
-    private updateParentSize(prevSize: number) {
-        if(prevSize === this.sizeInBytes){
-            // no need to update parents
-            return;
-        }
-
-        let currentNode: DirectoryNode = this;
-        let currentParent: DirectoryNode = this.parent;
-
-        while(currentParent != null) {
-            let currentParentPrevSize = currentParent._sizeInBytes;
-            currentParent._sizeInBytes -= prevSize;
-            prevSize = currentParentPrevSize;
-            currentParent._sizeInBytes += currentNode._sizeInBytes;
-
-            currentNode = currentParent;
-            currentParent = currentParent.parent;
+        while(currentNode != null) {
+            currentNode.meta = updateMetaData(currentNode.meta, updater);
+            currentNode = currentNode.parent;
         }
     }
 }
