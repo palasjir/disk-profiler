@@ -2,6 +2,7 @@ import {Table, TableBody, TableCell, TableHead, TableRow} from '@material-ui/cor
 import * as React from 'react';
 import {FileInfo} from '../../commons/types';
 import {formatSize} from '../../utils/format';
+import * as moment from 'moment';
 
 
 interface FsNodeTableProps {
@@ -26,7 +27,7 @@ export function FsNodeTable(props: FsNodeTableProps): JSX.Element | null {
                     <TableRow key={info.path}>
                         <TableCell component="th" scope="row">{info.path}</TableCell>
                         <TableCell>{formatSize(info.size)}</TableCell>
-                        <TableCell>{info.lastModifiedFormated}</TableCell>
+                        <TableCell>{moment(info.lastModified).startOf('hour').fromNow()}</TableCell>
                     </TableRow>
                 ))}
             </TableBody>
