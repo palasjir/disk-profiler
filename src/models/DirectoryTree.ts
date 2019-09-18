@@ -1,7 +1,7 @@
 // Character that we will use for trie tree root.
 import DirectoryNode from './DirectoryNode';
 import FileNode from './FileNode';
-import {fragmentizePath} from '../utils/path';
+import {fragmentizePath, normalizeRoot} from '../utils/path';
 import {FileData} from '../commons/types';
 
 const HEAD_CHARACTER = '.';
@@ -13,7 +13,7 @@ export default class DirectoryTree {
 
     public constructor(rootPath: string) {
         this.head = new DirectoryNode(HEAD_CHARACTER);
-        this.rootPath = rootPath.endsWith('/') ? rootPath : `${rootPath}/`;
+        this.rootPath = normalizeRoot(rootPath);
     }
 
     public hasSameRoot(path: string) {

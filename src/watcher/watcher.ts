@@ -91,8 +91,8 @@ export function createFileWatcher(path: string, options: WatcherOptions) {
         .on('unlinkDir', options.onDirRemoved)
         .on('addDir', options.onDirAdded)
         .on('add', options.onFileAdded)
-        .on('change', options.onFileChanged)
         .on('unlink', options.onFileRemoved)
+        .on('change', options.onFileChanged)
         .on('ready', options.onReady)
         .on('error', options.onError);
 

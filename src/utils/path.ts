@@ -5,8 +5,16 @@ export function normalizePath(path: string): string {
     return path.replace(/\\/g, '/');
 }
 
-export function removeRootPath(rootPath: string, path: string) {
+export function removeRootPath(rootPath: string, path: string): string {
     return path.trim().slice(rootPath.length);
+}
+
+export function normalizeRoot(path: string) {
+    return path.endsWith('/') ? path : `${path}/`
+}
+
+export function concatPath(rootPath: string, path: string): string {
+    return normalizeRoot(rootPath).concat(path);
 }
 
 export function fragmentizePath(rootPath: string, path: string): string[] {
