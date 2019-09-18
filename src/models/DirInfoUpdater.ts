@@ -18,7 +18,6 @@ export interface DirInfoUpdater {
     sizeInBytes?: DirInfoUpdaterFn<number>;
 }
 
-
 export function updateDirInfo(oldValue: DirInfo, updater?: DirInfoUpdater): DirInfo {
     if(!updater) return  oldValue;
     const updates: DirInfo = {...oldValue};
@@ -31,7 +30,6 @@ export function updateDirInfo(oldValue: DirInfo, updater?: DirInfoUpdater): DirI
     }
     return updates;
 }
-
 
 export function createSetDirectoryUpdater(newDir: DirectoryNode, oldDir?: DirectoryNode): DirInfoUpdater {
 
