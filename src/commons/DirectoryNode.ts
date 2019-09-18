@@ -12,19 +12,7 @@ import {
     updateMetaData
 } from './metaDataUpdaters';
 
-interface IDirectoryTreeNode {
-    readonly name: string;
-    readonly directories: Map<string, DirectoryNode>;
-    readonly files: Map<string, FileNode>;
-
-    getDirectory(name: string): DirectoryNode;
-    addEmptyDirectory(name: string, isCompleteWord: boolean, data: FileData): DirectoryNode;
-    removeDirectory(name: string): DirectoryNode;
-    hasDirectory(name: string): boolean;
-    hasDirectories(): boolean;
-}
-
-export default class DirectoryNode implements IDirectoryTreeNode {
+export default class DirectoryNode {
 
     readonly name: string;
     readonly directories: Map<string, DirectoryNode> = new Map();
