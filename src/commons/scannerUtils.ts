@@ -4,8 +4,7 @@
 import * as FS from 'fs';
 import DirectoryTree from './DirectoryTree';
 import * as PATH from "path";
-import {FileData, NodeType} from './types';
-import {stringify} from 'querystring';
+import {FileData} from './types';
 
 export function normalizePath(path: string): string {
     return path.replace(/\\/g, '/');
@@ -21,6 +20,12 @@ export function getStats(path: string): FS.Stats | null {
     return stats;
 }
 
+/**
+ *
+ * @param dirPath
+ * @param tree
+ * @deprecated using the watcher directly now
+ */
 export function scanDirectoryTree(dirPath: string, tree: DirectoryTree): DirectoryTree {
     const path = normalizePath(dirPath);
     const stats = getStats(path);
