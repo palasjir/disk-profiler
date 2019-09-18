@@ -16,7 +16,7 @@ async function openSelectDirectoryDialog(): Promise<OpenDialogReturnValue> {
     return remote.dialog.showOpenDialog({ properties: ['openDirectory'] })
 }
 
-export class MainStore {
+export class AppStore {
 
     @observable
     public scanState: ScanState = ScanState.NOT_STARTED;

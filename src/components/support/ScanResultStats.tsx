@@ -1,7 +1,7 @@
 import * as React from 'react';
 import styled from 'styled-components';
 
-import {formatSize} from '../utils/format';
+import {formatSize} from '../../utils/format';
 
 
 interface ScanResultsStatsProps {
@@ -31,14 +31,20 @@ const StyledSecondaryStat = styled.div`
       color: rgba(0, 0, 0, 0.4);
 `;
 
+const StyledScanResultsStatsContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
+
 export const ScanResultsStats = function ScanResultsStats(props: ScanResultsStatsProps) {
     return(
-        <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
+        <StyledScanResultsStatsContainer>
             <StyledScanResultsStats>
                 <StyledPrimaryStat>{formatSize(props.sizeInBytes)}</StyledPrimaryStat>
                 <StyledSecondaryStat>{props.numberOfFiles} files </StyledSecondaryStat>
                 <StyledSecondaryStat>{props.numberOfFolders} folders</StyledSecondaryStat>
             </StyledScanResultsStats>
-        </div>
+        </StyledScanResultsStatsContainer>
     )
 };

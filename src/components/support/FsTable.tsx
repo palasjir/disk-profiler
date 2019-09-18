@@ -1,6 +1,6 @@
 import {Table, TableBody, TableCell, TableHead, TableRow} from '@material-ui/core';
 import * as React from 'react';
-import FileNode from '../models/FileNode';
+import FileNode from '../../models/FileNode';
 
 
 interface FsNodeTableProps {
