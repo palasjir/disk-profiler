@@ -51,20 +51,23 @@ export default class DirectoryTree {
         return this;
     }
 
-    public removeDirectory(path: string): DirectoryTree {
+    public removeDirectory(path: string): DirectoryNode {
         const pathFragments = this.getPathFragments(path);
         const directoryParent = this.findDirectory(path, true);
         const toRemove = pathFragments[pathFragments.length - 1];
-        directoryParent.removeDirectory(toRemove);
-        return this;
+        return directoryParent.removeDirectory(toRemove);
     }
 
-    public removeFile(path: string): DirectoryTree {
+    /**
+     *
+     * @param path - path to file
+     * @return removed file
+     */
+    public removeFile(path: string): FileNode | undefined {
         const pathFragments = this.getPathFragments(path);
         const directoryParent = this.findDirectory(path, true);
         const toRemove = pathFragments[pathFragments.length - 1];
-        directoryParent.removeFile(toRemove);
-        return this;
+        return directoryParent.removeFile(toRemove);
     }
 
     public doesDirectoryExist(path: string): boolean {

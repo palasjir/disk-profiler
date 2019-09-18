@@ -137,5 +137,60 @@ describe('DirectoryTree', () => {
 
     });
 
+    describe('removeDirectory', () => {
+
+        test("removes directory from structure", () => {
+            const sut = new DirectoryTree(rootPath);
+            const folder = sut.addEmptyDirectory(`${rootPath}/folder`);
+            const nested1 = folder.addEmptyDirectory('nested1');
+            const nested2 = folder.addEmptyDirectory('nested2');
+            const removed = sut.removeDirectory(`${rootPath}/folder/nested1`);
+
+            expect(removed).toBe(nested1);
+            expect(folder.getDirectory('nested2')).toBe(nested2);
+        });
+
+        test("doesnt cause any side effect when file does not exist", () => {
+            const sut = new DirectoryTree(rootPath);
+            const folder = sut.addEmptyDirectory(`${rootPath}/folder`);
+            const nested1 = folder.addEmptyDirectory('nested1');
+            const nested2 = folder.addEmptyDirectory('nested2');
+            const removed = sut.removeDirectory(`${rootPath}/folder/nested3`);
+
+            expect(removed).toBeUndefined();
+            expect(folder.getDirectory('nested1')).toBe(nested1);
+            expect(folder.getDirectory('nested2')).toBe(nested2);
+        });
+
+    });
+
+    describe('removeFile', () => {
+
+        test("removes file from structure", () => {
+            const sut = new DirectoryTree(rootPath);
+            const folder = sut.addEmptyDirectory(`${rootPath}/folder`);
+            const file1 = folder.addFile('file1.txt', defaultFileData);
+            const file2 = folder.addFile('file2.txt', defaultFileData);
+            const removed = sut.removeFile(`${rootPath}/folder/file1.txt`);
+
+            expect(removed).toBe(file1);
+            expect(folder.getFile('file1.txt')).toBeUndefined();
+            expect(folder.getFile('file2.txt')).toBe(file2);
+        });
+
+        test("doesnt cause any side effect when file does not exist", () => {
+            const sut = new DirectoryTree(rootPath);
+            const folder = sut.addEmptyDirectory(`${rootPath}/folder`);
+            const file1 = folder.addFile('file1.txt', defaultFileData);
+            const file2 = folder.addFile('file2.txt', defaultFileData);
+            const removed = sut.removeFile(`${rootPath}/folder/doesNotExist.txt`);
+
+            expect(removed).toBeUndefined();
+            expect(folder.getFile('file1.txt')).toBe(file1);
+            expect(folder.getFile('file2.txt')).toBe(file2);
+        });
+
+    });
+
 
 });

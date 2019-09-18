@@ -95,10 +95,10 @@ export default class DirectoryNode implements IDirectoryTreeNode {
         return this.getFile(name);
     }
 
-    public removeFile(name: string): FileNode | null {
+    public removeFile(name: string): FileNode | undefined {
         const toRemove = this.getFile(name);
         if(!toRemove) {
-            return null
+            return undefined;
         }
 
         const prevSize = this.sizeInBytes;
@@ -177,12 +177,12 @@ export default class DirectoryNode implements IDirectoryTreeNode {
      * Removes directory from structure.
      *
      * @param name - directory name
-     * @return removed directory
+     * @return removed directory or undefined when there is nothing to remove
      */
-    removeDirectory(name: string): DirectoryNode {
+    removeDirectory(name: string): DirectoryNode | undefined {
         const childNode = this.getDirectory(name);
         if(!childNode){
-            return null;
+            return undefined;
         }
 
         this.directories.delete(name);
