@@ -1,5 +1,6 @@
 import {EVENT_MSG_TO_APP, EVENT_MSG_TO_SCANNER} from './commons/constants';
 import {
+    FileInfo,
     ScanStartEventData,
     ToAppMessage,
     ToAppMessageType,
@@ -11,10 +12,12 @@ import {ipcRenderer} from 'electron';
 import {createDirectoryTreeWatcher} from './watcher/watcher';
 import DirectoryTree from './models/DirectoryTree';
 import * as util from 'lodash';
+import {extractFileListFromTree, getTopFiles} from './utils/tree';
 
 let tree: DirectoryTree;
 let watcher: any;
 let canSendUpdates = false;
+let topFiles: FileInfo[] | undefined;
 
 function sendScannerReadyMsg() {
     const msg: ToAppMessage = {
@@ -44,14 +47,15 @@ function sendScanFinishedMsg(tree: DirectoryTree) {
     ipcRenderer.send(EVENT_MSG_TO_APP, msg);
 }
 
-const sendScanUpdatedMsg = util.debounce(function sendScanUpdatedMsg(tree: DirectoryTree) {
+const sendScanUpdatedMsg = util.debounce(function sendScanUpdatedMsg(tree: DirectoryTree, topFiles?: FileInfo[]) {
     const msg: ToAppMessage = {
         type: ToAppMessageType.UPDATED,
         data: {
             tree: {
                 numberOfFiles: tree.head.totalNumberOfFiles,
                 numberOfFolders: tree.head.totalNumberOfDirectories,
-                size: tree.head.sizeInBytes
+                size: tree.head.sizeInBytes,
+                topFiles: topFiles
             }
         }
     };
@@ -64,6 +68,13 @@ function sendScanError(e: any) {
         data: e
     };
     ipcRenderer.send(EVENT_MSG_TO_APP, toAppMessage)
+}
+
+function getAndSendTopFiles(tree: DirectoryTree) {
+    const files = extractFileListFromTree(tree);
+    const topFiles = getTopFiles(files, 100);
+    sendScanUpdatedMsg(tree, topFiles);
+    return topFiles;
 }
 
 function startScan(msg: ToScannerMessage) {
@@ -91,7 +102,8 @@ function startScan(msg: ToScannerMessage) {
         },
         onReady(): void {
             sendScanFinishedMsg(tree);
-            canSendUpdates = true
+            canSendUpdates = true;
+            topFiles = getAndSendTopFiles(tree);
         }
     });
 }

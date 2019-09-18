@@ -44,6 +44,7 @@ export interface SecondaryStats {
 
 export interface NodeStats extends SecondaryStats {
     size: number;
+    topFiles?: FileInfo[];
 }
 
 export interface FileInfo {

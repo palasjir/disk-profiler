@@ -33,8 +33,8 @@ export class AppStore {
     @observable
     public numberOfFolders?: number;
 
-    public topFiles: IObservableArray<FileNode> = observable.array([]);
-    public topFolders: IObservableArray<FileNode> = observable.array([]);
+    @observable
+    public topFiles?: FileInfo[];
 
     public constructor() {
         ipcRenderer.on(EVENT_MSG_TO_APP, this.handleScanMsg);
@@ -87,10 +87,7 @@ export class AppStore {
             this.totalSize = data.tree.size;
             this.numberOfFiles = data.tree.numberOfFiles;
             this.numberOfFolders = data.tree.numberOfFolders;
-            this.topFiles.clear();
-            this.topFolders.clear();
-            // data.tree.topFiles.forEach(file => this.topFiles.push(file));
-            // data.tree.topFolders.forEach(file => this.topFolders.push(file));
+            this.topFiles = data.tree.topFiles;
         }
     };
 

@@ -6,6 +6,7 @@ import {Button, Grid, Paper, Typography} from '@material-ui/core';
 import {ScanFolderButton} from '../support/buttons';
 import {ScanResultsStats} from '../support/ScanResultStats';
 import { Page } from '../page';
+import {FsNodeTable} from '../support/FsTable';
 
 export const ScanResults = observer(function ScanResult(): JSX.Element {
     const mainStore = React.useContext(AppStoreContext);
@@ -41,26 +42,11 @@ export const ScanResults = observer(function ScanResult(): JSX.Element {
                                     <Typography variant="h5" gutterBottom>
                                         Largest Files
                                     </Typography>
-                                    {/*<FsNodeTable nodes={mainStore.topFiles} />*/}
+                                    <FsNodeTable infos={mainStore.topFiles} />
                                 </div>
                             </Grid>
                             <Grid item>
                                 <Button>Show all files</Button>
-                            </Grid>
-                        </Grid>
-                    </Paper>
-                </Grid>
-                <Grid item>
-                    <Paper className={classes.content}>
-                        <Grid container direction="column" justify="flex-start" alignItems="stretch">
-                            <Grid item>
-                                <Typography variant="h5" gutterBottom>
-                                    Largest Folders
-                                </Typography>
-                                {/*<FsNodeTable nodes={mainStore.topFolders} />*/}
-                            </Grid>
-                            <Grid item>
-                                <Button>Show all folders</Button>
                             </Grid>
                         </Grid>
                     </Paper>
