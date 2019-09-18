@@ -1,8 +1,8 @@
 import DirectoryTree from '../DirectoryTree';
-import {FileData} from '../../commons/types';
+import {FileInfo} from '../../commons/types';
 
 const rootPath  = '/root/path';
-const defaultFileData: FileData = { size: 500, lastModified: 0};
+const defaultFileData: FileInfo = { size: 500, lastModified: 0};
 
 describe('DirectoryTree', () => {
 

@@ -1,4 +1,4 @@
-import {DirInfo, FileData} from '../commons/types';
+import {DirInfo, FileInfo} from '../commons/types';
 import FileNode from './FileNode';
 import {
     createAddEmptyDirectoryUpdater,
@@ -60,7 +60,7 @@ export default class DirectoryNode {
         return newDir;
     }
 
-    public addFile(name: string, data: FileData): FileNode | undefined {
+    public addFile(name: string, data: FileInfo): FileNode | undefined {
         if(this.files.has(name)) {
             return this.getFile(name);
         }

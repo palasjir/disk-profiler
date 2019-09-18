@@ -1,6 +1,6 @@
 import {ipcRenderer, IpcRendererEvent, OpenDialogReturnValue, remote} from 'electron';
 import {
-    FileData,
+    FileInfo,
     ScanResultData,
     ScanState,
     ToAppMessage,

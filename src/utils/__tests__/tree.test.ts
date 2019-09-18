@@ -3,11 +3,11 @@ import {
     extractFileListFromNode,
     extractFileListFromTree
 } from '../tree';
-import {FileData} from '../../commons/types';
+import {FileInfo} from '../../commons/types';
 import DirectoryNode from '../../models/DirectoryNode';
 
 const rootPath = '/root/path';
-const defaultFileData: FileData = { size: 500, lastModified: 0};
+const defaultFileData: FileInfo = { size: 500, lastModified: 0};
 const path = (p: string) => rootPath + p;
 
 describe('extractFileListFromTree()', () => {

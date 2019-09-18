@@ -1,14 +1,14 @@
 import DirectoryNode from '../DirectoryNode';
-import {FileData} from '../../commons/types';
+import {FileInfo} from '../../commons/types';
 
-const defaultFileData: FileData = {size: 500, lastModified: 0};
+const defaultFileData: FileInfo = {size: 500, lastModified: 0};
 
 describe('DirectoryNode', () => {
 
     describe('addFile', () => {
         test('adds non existing file', () => {
             const sut = new DirectoryNode('.');
-            const nodeData: FileData = {
+            const nodeData: FileInfo = {
                 size: 1024,
                 lastModified: 0
             };

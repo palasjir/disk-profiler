@@ -1,6 +1,6 @@
 import * as chokidar from 'chokidar';
 import * as FS from 'fs';
-import {FileData} from '../commons/types';
+import {FileInfo} from '../commons/types';
 import DirectoryTree from '../models/DirectoryTree';
 import {getStats} from '../utils/scanner';
 
@@ -16,7 +16,7 @@ export interface WatcherOptions {
 }
 
 
-function statsToFileData(stats?: FS.Stats): FileData {
+function statsToFileData(stats?: FS.Stats): FileInfo {
     if(!stats) {
         return {
             size: 0,

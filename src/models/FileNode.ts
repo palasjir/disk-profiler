@@ -1,10 +1,10 @@
-import {FileData} from '../commons/types';
+import {FileInfo} from '../commons/types';
 
 export default class FileNode {
     name: string;
-    data: FileData;
+    data: FileInfo;
 
-    public constructor(name: string, data: FileData) {
+    public constructor(name: string, data: FileInfo) {
         this.name = name;
         this.data = data;
     }

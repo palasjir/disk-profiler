@@ -2,7 +2,7 @@
 import DirectoryNode from './DirectoryNode';
 import FileNode from './FileNode';
 import {fragmentizePath, normalizeRoot} from '../utils/path';
-import {FileData} from '../commons/types';
+import {FileInfo} from '../commons/types';
 
 const HEAD_CHARACTER = '.';
 
@@ -32,7 +32,7 @@ export default class DirectoryTree {
         return this.createDirectoryStructure(pathFragments);
     }
 
-    public addFile(path: string, data: FileData): DirectoryTree {
+    public addFile(path: string, data: FileInfo): DirectoryTree {
         if(!this.hasSameRoot(path)){
             return this;
         }

@@ -46,7 +46,7 @@ export interface NodeStats extends SecondaryStats {
     size: number;
 }
 
-export interface FileData {
+export interface FileInfo {
     size: number;
     lastModified: number;
     path?: number;
