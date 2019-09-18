@@ -49,8 +49,8 @@ function sendScanFinishedMsg(tree: DirectoryTree) {
         type: ToAppMessageType.FINISHED,
         data: {
             tree: {
-                numberOfFiles: 0,
-                numberOfFolders: 0,
+                numberOfFiles: tree.head.totalNumberOfFiles,
+                numberOfFolders: tree.head.totalNumberOfDirectories,
                 size: tree.head.sizeInBytes
             }
         }
@@ -63,8 +63,8 @@ function sendScanUpdatedMsg(tree: DirectoryTree) {
         type: ToAppMessageType.UPDATED,
         data: {
             tree: {
-                numberOfFiles: 0,
-                numberOfFolders: 0,
+                numberOfFiles: tree.head.totalNumberOfFiles,
+                numberOfFolders: tree.head.totalNumberOfDirectories,
                 size: tree.head.sizeInBytes
             }
         }
