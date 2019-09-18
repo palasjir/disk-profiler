@@ -1,4 +1,4 @@
-import {createDirectoryTreeWatcher, WatcherOptions} from '../src/commons/watcher';
+import {createDirectoryTreeWatcher, WatcherOptions} from '../src/watcher/watcher';
 import {formatSize} from '../src/utils/format';
 
 const pathToScan1 = "/Users/jirpal/Downloads/skolka-praminek";

@@ -1,6 +1,6 @@
 import * as chokidar from 'chokidar';
 import * as FS from 'fs';
-import {FileData} from './types';
+import {FileData} from '../commons/types';
 import DirectoryTree from '../models/DirectoryTree';
 
 

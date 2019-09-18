@@ -1,3 +1,10 @@
-chokodir
+# Disk profiler
 
-https://github.com/zz85/space-radar
+Scans disk size.
+
+## How to run
+
+```
+yarn install
+yarn start
+```

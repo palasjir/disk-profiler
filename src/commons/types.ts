@@ -42,12 +42,6 @@ export enum ScanState {
     , FINISHED
 }
 
-export enum NodeType {
-    FOLDER
-    , FILE
-    , UNKNOWN
-}
-
 export interface SecondaryStats {
     numberOfFiles: number;
     numberOfFolders: number;

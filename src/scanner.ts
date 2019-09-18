@@ -8,7 +8,7 @@ import {
 } from './commons/types';
 
 import {ipcRenderer} from 'electron';
-import {createDirectoryTreeWatcher} from './commons/watcher';
+import {createDirectoryTreeWatcher} from './watcher/watcher';
 import DirectoryTree from './models/DirectoryTree';
 
 let tree: DirectoryTree;
