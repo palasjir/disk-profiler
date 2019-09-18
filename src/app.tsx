@@ -13,11 +13,6 @@ import {
     Grid,
     LinearProgress,
     Paper,
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableRow,
     Typography
 } from '@material-ui/core';
 import {useStyles} from './styles';
