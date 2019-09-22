@@ -1,9 +1,8 @@
 import DirectoryWatcher from './DirectoryWatcher';
-import {FileInfo, ScanStartEventData, ToAppMessageType, ToScannerMessage, ToScannerMessageType} from '../commons/types';
+import {ScanStartEventData, ToAppMessageType, ToScannerMessage, ToScannerMessageType} from '../commons/types';
 import {ipcRenderer} from 'electron';
 import {EVENT_MSG_TO_APP, EVENT_MSG_TO_SCANNER} from '../commons/constants';
 import DirectoryTree from '../models/DirectoryTree';
-import {extractFileListFromTree, getTopFiles} from '../utils/tree';
 import ScannerMessenger from './ScannerMessenger';
 
 export default class ScannerProcess {
@@ -15,6 +14,25 @@ export default class ScannerProcess {
         ipcRenderer.on(EVENT_MSG_TO_SCANNER, this.handleMessage);
         this.messenger.sendScannerReadyMsg();
     }
+
+    private handleMessage = (event: any, msg: ToScannerMessage) => {
+        console.log(`Received event ${msg.type}.`);
+        switch (msg.type) {
+            case ToScannerMessageType.START:
+                this.startScan(msg);
+                break;
+            case ToScannerMessageType.SHOW_MORE:
+                this.handleShowMoreFiles();
+            case ToScannerMessageType.CANCEL:
+                // main process is taking care of this
+                break;
+        }
+    };
+
+    private getAndSendTopFiles = (tree: DirectoryTree) => {
+        this.watcher.initTopFiles();
+        this.messenger.sendScanUpdatedMsg(tree, this.watcher.topFiles);
+    };
 
     private startScan = async (msg: ToScannerMessage): Promise<void> => {
         let canSendUpdates = false;
@@ -55,29 +73,17 @@ export default class ScannerProcess {
         }
     };
 
-    private handleMessage = (event: any, msg: ToScannerMessage) => {
-        console.log(`Received event ${msg.type}.`);
-        switch (msg.type) {
-            case ToScannerMessageType.START:
-                this.startScan(msg);
-                break;
-            case ToScannerMessageType.CANCEL:
-                // main process is taking care of this
-                break;
-        }
-    };
-
-    private getAndSendTopFiles = (tree: DirectoryTree) => {
-        this.watcher.initTopFiles();
-        this.messenger.sendScanUpdatedMsg(tree, this.watcher.topFiles);
-    };
-
     private sendScanError = (e: any) =>{
         const toAppMessage = {
             type: ToAppMessageType.ERROR,
             data: e
         };
         ipcRenderer.send(EVENT_MSG_TO_APP, toAppMessage)
+    };
+
+    private handleShowMoreFiles = () => {
+        this.watcher.moreFiles();
+        this.messenger.sendScanUpdatedMsg(this.watcher.tree, this.watcher.topFiles);
     }
 
 }

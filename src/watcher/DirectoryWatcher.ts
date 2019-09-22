@@ -3,10 +3,10 @@ import * as chokidar from 'chokidar';
 import * as FS from 'fs';
 import {noop} from '../utils/base';
 import {statsToFileData} from '../utils/stats';
-import {FileInfo} from '../commons/types';
-import {extractFileListFromTree, getTopFiles} from '../utils/tree';
+import {extractFileListFromTree} from '../utils/tree';
 import {getStats} from '../utils/scanner';
 import DebugLogger from './DebugLogger';
+import {SortedFileList} from './SortedFileList';
 
 export interface WatcherOptions {
     debug?: boolean;
@@ -20,11 +20,12 @@ export interface WatcherOptions {
     onError?(error?: any): void;
 }
 
-const WATCHER_OPTIONS = {
+const WATCHER_CONFIG = {
     persistent: true,
     followSymlinks: false,
     disableGlobbing: true,
-    awaitWriteFinish: true
+    awaitWriteFinish: true,
+    alwaysStat: true
 };
 
 const DEFAULT_OPTIONS: WatcherOptions = {
@@ -39,14 +40,17 @@ const DEFAULT_OPTIONS: WatcherOptions = {
     onDirAdded: noop
 };
 
+const NUMBER_OF_FILES_BATCH = 100;
+
 export default class DirectoryWatcher {
 
     private logger: DebugLogger = new DebugLogger();
     private path: string;
     private watcher: chokidar.FSWatcher;
     private _tree: DirectoryTree;
-    private _topFiles: FileInfo[] = [];
+    private _topFiles?: SortedFileList;
     private options: WatcherOptions;
+    private showNumberOfFiles = NUMBER_OF_FILES_BATCH;
 
     constructor(path: string, options?: WatcherOptions) {
         this.path = path;
@@ -63,8 +67,9 @@ export default class DirectoryWatcher {
             return Promise.reject(new Error('Watcher is already running!'));
         }
         this._tree = new DirectoryTree(this.path);
+        this._topFiles = undefined;
         return new Promise((resolve, reject) => {
-            this.watcher = chokidar.watch(this.path, WATCHER_OPTIONS);
+            this.watcher = chokidar.watch(this.path, WATCHER_CONFIG);
             this.watcher
                 .on('error', e => {
                     this.onError(e);
@@ -84,7 +89,7 @@ export default class DirectoryWatcher {
 
     public async initTopFiles() {
         const files = extractFileListFromTree(this.tree);
-        this._topFiles = getTopFiles(files, 100);
+        this._topFiles = new SortedFileList(files);
     }
 
     private onReady() {
@@ -106,7 +111,10 @@ export default class DirectoryWatcher {
 
     private onFileRemoved(path: string) {
         this.logger.log(`Removing file: ${path}`);
-        this._tree.removeFile(path);
+        const removed = this._tree.removeFile(path);
+        if(removed && this._topFiles) {
+            this._topFiles.remove(removed.info);
+        }
         this.options.onFileRemoved(path);
     }
 
@@ -116,17 +124,23 @@ export default class DirectoryWatcher {
         this.options.onDirAdded(path);
     }
 
-    private async onFileAdded(path: string, stats?: FS.Stats) {
+    private onFileAdded(path: string, stats?: FS.Stats) {
         this.logger.log(`Adding file: ${path}`);
-        const fileInfo = await this.getFileInfo(path);
+        const fileInfo = statsToFileData(path, stats);
         this._tree.addFile(path, fileInfo);
+        if(this._topFiles) {
+            this._topFiles.add(fileInfo);
+        }
         this.options.onFileAdded(path);
     }
 
-    private async onFileChanged(path: string, stats?: FS.Stats) {
+    private onFileChanged(path: string, stats?: FS.Stats) {
         this.logger.log(`Changing file: ${path}`);
-        const fileInfo = await this.getFileInfo(path);
+        const fileInfo = statsToFileData(path, stats);
         const updateResult = this._tree.updateFile(path, fileInfo);
+        if(updateResult && this._topFiles) {
+            this._topFiles.update(fileInfo);
+        }
         if(updateResult) {
             this.options.onFileChanged(path);
         }
@@ -148,7 +162,11 @@ export default class DirectoryWatcher {
     }
 
     public get topFiles() {
-        return this._topFiles;
+        return this._topFiles.getRange(this.showNumberOfFiles);
+    }
+
+    public moreFiles() {
+        this.showNumberOfFiles += NUMBER_OF_FILES_BATCH;
     }
 
 }

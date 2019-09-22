@@ -42,3 +42,11 @@ export function OpenInFileExplorerButton(props: OpenInFileExplorerButtonProps): 
         </Button>
     )
 }
+
+export function ShowMoreFilesButton(): JSX.Element {
+    const mainStore = React.useContext(AppStoreContext);
+    return (
+        <Button onClick={() => mainStore.showMoreFiles()}>Show more files</Button>
+    )
+}
+

@@ -1,5 +1,6 @@
 export enum ToScannerMessageType {
     START='START'
+    ,SHOW_MORE='SHOW_MORE'
     , CANCEL = 'CANCEL'
 }
 

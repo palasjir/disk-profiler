@@ -134,4 +134,12 @@ export class AppStore {
     public revealInFileExplorer(fullPath: string) {
         remote.shell.showItemInFolder(fullPath);
     }
+
+    @action
+    public showMoreFiles(): void {
+        const msg: ToScannerMessage = {
+            type: ToScannerMessageType.SHOW_MORE
+        };
+        ipcRenderer.send(EVENT_MSG_TO_SCANNER, msg);
+    }
 }

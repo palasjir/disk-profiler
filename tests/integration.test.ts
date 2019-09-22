@@ -57,7 +57,7 @@ describe('Directory Watcher - integration tests', () => {
     let watcher: DirectoryWatcher;
 
     beforeEach(() => {
-        const options = {debug: true, debugAfterReady: true};
+        const options = {debug: true};
         watcher = new DirectoryWatcher(rootPath, options);
         testSetup();
     });

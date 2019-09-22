@@ -3,7 +3,7 @@ import * as React from 'react';
 import {AppStoreContext} from '../../store/AppStoreContext';
 import {useStyles} from '../../styles';
 import {Button, Grid, Paper, Typography} from '@material-ui/core';
-import {ScanFolderButton} from '../support/buttons';
+import {ScanFolderButton, ShowMoreFilesButton} from '../support/buttons';
 import {ScanResultsStats} from '../support/ScanResultStats';
 import { Page } from '../page';
 import {FsNodeTable} from '../support/FsTable';
@@ -46,8 +46,7 @@ export const ScanResults = observer(function ScanResult(): JSX.Element {
                                 </div>
                             </Grid>
                             <Grid item>
-                                {/* Todo: Load add ability to browse more than 100 files. */}
-                                <Button onClick={() => window.alert("Sorry! Lazy programmer haven't provided this yet.")}>Show more files</Button>
+                                <ShowMoreFilesButton />
                             </Grid>
                         </Grid>
                     </Paper>
