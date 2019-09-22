@@ -27,12 +27,22 @@ export class SortedFileList {
         const index = this.findIndex(file);
         this.list.splice(index, 0, file);
         this.map.set(file.normalizedPath, index);
+
+        // update indexes of the files that got moved
+        for (let i = index + 1; i < this.list.length; i ++) {
+            this.map.set(this.list[i].normalizedPath, i);
+        }
     }
 
     public remove(fileInfo: FileInfo): void {
         const index = this.map.get(fileInfo.normalizedPath);
         if(this.map.delete(fileInfo.normalizedPath)) {
             this.list.splice(index, 1);
+        }
+
+        // update indexes of the files that got moved
+        for (let i = index; i < this.list.length; i++) {
+            this.map.set(this.list[i].normalizedPath, i);
         }
     }
 
