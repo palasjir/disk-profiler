@@ -6,6 +6,7 @@ import {statsToFileData} from '../utils/stats';
 import {FileInfo} from '../commons/types';
 import {extractFileListFromTree, getTopFiles} from '../utils/tree';
 import {getStats} from '../utils/scanner';
+import DebugLogger from './DebugLogger';
 
 export interface WatcherOptions {
     debug?: boolean;
@@ -38,27 +39,9 @@ const DEFAULT_OPTIONS: WatcherOptions = {
     onDirAdded: noop
 };
 
-class DebugLogger {
-
-    public debug: boolean;
-    public afterReady: boolean;
-    public isReady: boolean;
-
-    public canLog() {
-        if(!this.debug) return false;
-        return !(this.afterReady && !this.isReady);
-
-    }
-
-    public log(value: string) {
-        if(!this.canLog()) return;
-        console.log(value);
-    }
-}
-
 export default class DirectoryWatcher {
 
-    private log: DebugLogger = new DebugLogger();
+    private logger: DebugLogger = new DebugLogger();
     private path: string;
     private watcher: chokidar.FSWatcher;
     private _tree: DirectoryTree;
@@ -71,8 +54,8 @@ export default class DirectoryWatcher {
             ...DEFAULT_OPTIONS,
             ...options
         };
-        this.log.debug = options && options.debug;
-        this.log.afterReady = options && options.debugAfterReady;
+        this.logger.debug = options && options.debug;
+        this.logger.afterReady = options && options.debugAfterReady;
     }
 
     public start(): Promise<void> {
@@ -105,43 +88,43 @@ export default class DirectoryWatcher {
     }
 
     private onReady() {
-        this.log.isReady = true;
-        this.log.log('Ready!');
+        this.logger.isReady = true;
+        this.logger.log('Ready!');
         this.options.onReady();
     }
 
     private onError(error: any) {
-        this.log.log(`Error: ${error}`);
+        this.logger.log(`Error: ${error}`);
         this.options.onError(error);
     }
 
     private onDirRemoved(path: string) {
-        this.log.log(`Removing directory: ${path}`);
+        this.logger.log(`Removing directory: ${path}`);
         this._tree.removeDirectory(path);
         this.options.onDirRemoved(path)
     }
 
     private onFileRemoved(path: string) {
-        this.log.log(`Removing file: ${path}`);
+        this.logger.log(`Removing file: ${path}`);
         this._tree.removeFile(path);
         this.options.onFileRemoved(path);
     }
 
     private onDirAdded(path: string) {
-        this.log.log(`Adding directory: ${path}`);
+        this.logger.log(`Adding directory: ${path}`);
         this._tree.addEmptyDirectory(path);
         this.options.onDirAdded(path);
     }
 
     private async onFileAdded(path: string, stats?: FS.Stats) {
-        this.log.log(`Adding file: ${path}`);
+        this.logger.log(`Adding file: ${path}`);
         const fileInfo = await this.getFileInfo(path);
         this._tree.addFile(path, fileInfo);
         this.options.onFileAdded(path);
     }
 
     private async onFileChanged(path: string, stats?: FS.Stats) {
-        this.log.log(`Changing file: ${path}`);
+        this.logger.log(`Changing file: ${path}`);
         const fileInfo = await this.getFileInfo(path);
         const updateResult = this._tree.updateFile(path, fileInfo);
         if(updateResult) {
@@ -151,7 +134,7 @@ export default class DirectoryWatcher {
 
     private getFileInfo = async (path: string) => {
         const stats = await getStats(path);
-        if(stats) return null;
+        if(!stats) return null;
         return statsToFileData(path, stats)
     };
 
