@@ -7,9 +7,8 @@ import {FileInfo} from '../../commons/types';
 import DirectoryNode from '../../models/DirectoryNode';
 
 const rootPath = '/root/path';
-const defaultFileData: FileInfo = { size: 500, lastModified: 0};
+const fileData = (p: string): FileInfo => ({size: 500, lastModified: 0, originalPath: p, normalizedPath: p});
 const path = (p: string) => rootPath + p;
-const cData = (p: string):FileInfo => ({...defaultFileData, path: path(p)});
 
 describe('extractFileListFromTree()', () => {
 
@@ -21,28 +20,28 @@ describe('extractFileListFromTree()', () => {
 
     test('gets list of all files contained in the tree', () => {
         const tree = new DirectoryTree(rootPath);
-        tree.addFile(path('/file1.txt'), defaultFileData);
-        tree.addFile(path('/file2.txt'), defaultFileData);
-        tree.addFile(path('/dir1/file3.txt'), defaultFileData);
-        tree.addFile(path('/dir1/file4.txt'), defaultFileData);
-        tree.addFile(path('/dir2/file5.txt'), defaultFileData);
-        tree.addFile(path('/dir2/file6.txt'), defaultFileData);
-        tree.addFile(path('/dir1/nested1/file7.txt'), defaultFileData);
-        tree.addFile(path('/dir1/nested1/file8.txt'), defaultFileData);
+        tree.addFile(path('/file1.txt'), fileData('/file1.txt'));
+        tree.addFile(path('/file2.txt'), fileData('/file2.txt'));
+        tree.addFile(path('/dir1/file3.txt'), fileData('/dir1/file3.txt'));
+        tree.addFile(path('/dir1/file4.txt'), fileData('/dir1/file4.txt'));
+        tree.addFile(path('/dir2/file5.txt'), fileData('/dir2/file5.txt'));
+        tree.addFile(path('/dir2/file6.txt'), fileData('/dir2/file6.txt'));
+        tree.addFile(path('/dir1/nested1/file7.txt'), fileData('/dir1/nested1/file7.txt'));
+        tree.addFile(path('/dir1/nested1/file8.txt'), fileData('/dir1/nested1/file8.txt'));
 
         expect(tree.head.totalNumberOfFiles).toEqual(8);
 
         const result = extractFileListFromTree(tree);
 
         expect(result).toHaveLength(8);
-        expect(result).toContainEqual(cData('/file1.txt'));
-        expect(result).toContainEqual(cData('/file2.txt'));
-        expect(result).toContainEqual(cData('/dir1/file3.txt'));
-        expect(result).toContainEqual(cData('/dir1/file4.txt'));
-        expect(result).toContainEqual(cData('/dir2/file5.txt'));
-        expect(result).toContainEqual(cData('/dir2/file6.txt'));
-        expect(result).toContainEqual(cData('/dir1/nested1/file7.txt'));
-        expect(result).toContainEqual(cData('/dir1/nested1/file8.txt'));
+        expect(result).toContainEqual(fileData('/file1.txt'));
+        expect(result).toContainEqual(fileData('/file2.txt'));
+        expect(result).toContainEqual(fileData('/dir1/file3.txt'));
+        expect(result).toContainEqual(fileData('/dir1/file4.txt'));
+        expect(result).toContainEqual(fileData('/dir2/file5.txt'));
+        expect(result).toContainEqual(fileData('/dir2/file6.txt'));
+        expect(result).toContainEqual(fileData('/dir1/nested1/file7.txt'));
+        expect(result).toContainEqual(fileData('/dir1/nested1/file8.txt'));
     });
 
 });
@@ -57,28 +56,28 @@ describe('extractFileListFromNode()', () => {
 
     test('gets list of all files contained in the node', () => {
         const tree = new DirectoryTree(rootPath);
-        tree.addFile(path('/file1.txt'), defaultFileData);
-        tree.addFile(path('/file2.txt'), defaultFileData);
-        tree.addFile(path('/dir1/file3.txt'), defaultFileData);
-        tree.addFile(path('/dir1/file4.txt'), defaultFileData);
-        tree.addFile(path('/dir2/file5.txt'), defaultFileData);
-        tree.addFile(path('/dir2/file6.txt'), defaultFileData);
-        tree.addFile(path('/dir1/nested1/file7.txt'), defaultFileData);
-        tree.addFile(path('/dir1/nested1/file8.txt'), defaultFileData);
+        tree.addFile(path('/file1.txt'), fileData('/file1.txt'));
+        tree.addFile(path('/file2.txt'), fileData('/file2.txt'));
+        tree.addFile(path('/dir1/file3.txt'), fileData('/dir1/file3.txt'));
+        tree.addFile(path('/dir1/file4.txt'), fileData('/dir1/file4.txt'));
+        tree.addFile(path('/dir2/file5.txt'), fileData('/dir2/file5.txt'));
+        tree.addFile(path('/dir2/file6.txt'), fileData('/dir2/file6.txt'));
+        tree.addFile(path('/dir1/nested1/file7.txt'), fileData('/dir1/nested1/file7.txt'));
+        tree.addFile(path('/dir1/nested1/file8.txt'), fileData('/dir1/nested1/file8.txt'));
 
         expect(tree.head.totalNumberOfFiles).toEqual(8);
 
         const result = extractFileListFromNode(tree.head, rootPath);
 
         expect(result).toHaveLength(8);
-        expect(result).toContainEqual(cData('/file1.txt'));
-        expect(result).toContainEqual(cData('/file2.txt'));
-        expect(result).toContainEqual(cData('/dir1/file3.txt'));
-        expect(result).toContainEqual(cData('/dir1/file4.txt'));
-        expect(result).toContainEqual(cData('/dir2/file5.txt'));
-        expect(result).toContainEqual(cData('/dir2/file6.txt'));
-        expect(result).toContainEqual(cData('/dir1/nested1/file7.txt'));
-        expect(result).toContainEqual(cData('/dir1/nested1/file8.txt'));
+        expect(result).toContainEqual(fileData('/file1.txt'));
+        expect(result).toContainEqual(fileData('/file2.txt'));
+        expect(result).toContainEqual(fileData('/dir1/file3.txt'));
+        expect(result).toContainEqual(fileData('/dir1/file4.txt'));
+        expect(result).toContainEqual(fileData('/dir2/file5.txt'));
+        expect(result).toContainEqual(fileData('/dir2/file6.txt'));
+        expect(result).toContainEqual(fileData('/dir1/nested1/file7.txt'));
+        expect(result).toContainEqual(fileData('/dir1/nested1/file8.txt'));
     });
 
 });
@@ -88,40 +87,47 @@ describe('getTopFiles', () => {
 
         const list: FileInfo[] = [
             {
-                path: '/a',
+                originalPath: '/a',
+                normalizedPath: '/a',
                 lastModified: 0,
                 size: 10,
             },
             {
-                path: '/b',
+                originalPath: '/b',
+                normalizedPath: '/b',
                 lastModified: 0,
                 size: 20,
             },
             {
-                path: '/c',
+                originalPath: '/c',
+                normalizedPath: '/c',
                 lastModified: 0,
                 size: 30,
             },
             {
-                path: '/d',
+                originalPath: '/d',
+                normalizedPath: '/d',
                 lastModified: 0,
                 size: 40,
             }
         ];
 
-        const expected = [
+        const expected: FileInfo[] = [
             {
-                path: '/d',
+                originalPath: '/d',
+                normalizedPath: '/d',
                 lastModified: 0,
                 size: 40,
             },
             {
-                path: '/c',
+                originalPath: '/c',
+                normalizedPath: '/c',
                 lastModified: 0,
                 size: 30,
             },
             {
-                path: '/b',
+                originalPath: '/b',
+                normalizedPath: '/b',
                 lastModified: 0,
                 size: 20,
             }

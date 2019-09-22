@@ -3,6 +3,7 @@ import DirectoryNode from './DirectoryNode';
 import FileNode from './FileNode';
 import {fragmentizePath, normalizeRoot} from '../utils/path';
 import {FileInfo} from '../commons/types';
+import {isEqual} from  'lodash';
 
 const HEAD_CHARACTER = '.';
 
@@ -49,12 +50,21 @@ export default class DirectoryTree {
         return currentNode.addFile(pathFragments[pathFragments.length - 1], data);
     }
 
+    /**
+     *
+     * @param path
+     * @param newFileInfo
+     * @return null if file is not updated
+     */
     public updateFile(path: string, newFileInfo: FileInfo): FileNode | null {
         if(!this.hasSameRoot(path)){
             return null;
         }
         const file = this.findFile(path);
         if (!file) {
+            return null;
+        }
+        if(isEqual(file.info, newFileInfo)){
             return null;
         }
         file.info = newFileInfo;

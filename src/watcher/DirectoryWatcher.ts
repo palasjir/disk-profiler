@@ -1,9 +1,23 @@
 import DirectoryTree from '../models/DirectoryTree';
-import {createDirectoryTreeWatcher, statsToFileData, WatcherOptions} from './watcher';
 import * as chokidar from 'chokidar';
 import * as FS from 'fs';
-import {getStats} from '../utils/scanner';
 import {noop} from '../utils/base';
+import {statsToFileData} from '../utils/stats';
+import {FileInfo} from '../commons/types';
+import {extractFileListFromTree, getTopFiles} from '../utils/tree';
+import {getStats} from '../utils/scanner';
+
+export interface WatcherOptions {
+    debug?: boolean;
+    debugAfterReady?: boolean;
+    onFileAdded?(path: string): void;
+    onFileChanged?(path: string): void;
+    onFileRemoved?(path: string): void;
+    onDirAdded?(path: string): void;
+    onDirRemoved?(path: string): void;
+    onReady?(): void;
+    onError?(error?: any): void;
+}
 
 const WATCHER_OPTIONS = {
     persistent: true,
@@ -47,7 +61,8 @@ export default class DirectoryWatcher {
     private log: DebugLogger = new DebugLogger();
     private path: string;
     private watcher: chokidar.FSWatcher;
-    private tree: DirectoryTree;
+    private _tree: DirectoryTree;
+    private _topFiles: FileInfo[] = [];
     private options: WatcherOptions;
 
     constructor(path: string, options?: WatcherOptions) {
@@ -64,7 +79,7 @@ export default class DirectoryWatcher {
         if(this.watcher) {
             return Promise.reject(new Error('Watcher is already running!'));
         }
-        this.tree = new DirectoryTree(this.path);
+        this._tree = new DirectoryTree(this.path);
         return new Promise((resolve, reject) => {
             this.watcher = chokidar.watch(this.path, WATCHER_OPTIONS);
             this.watcher
@@ -84,6 +99,11 @@ export default class DirectoryWatcher {
         })
     }
 
+    public async initTopFiles() {
+        const files = extractFileListFromTree(this.tree);
+        this._topFiles = getTopFiles(files, 100);
+    }
+
     private onReady() {
         this.log.isReady = true;
         this.log.log('Ready!');
@@ -97,43 +117,55 @@ export default class DirectoryWatcher {
 
     private onDirRemoved(path: string) {
         this.log.log(`Removing directory: ${path}`);
-        this.tree.removeDirectory(path);
+        this._tree.removeDirectory(path);
         this.options.onDirRemoved(path)
     }
 
     private onFileRemoved(path: string) {
         this.log.log(`Removing file: ${path}`);
-        this.tree.removeFile(path);
+        this._tree.removeFile(path);
         this.options.onFileRemoved(path);
     }
 
     private onDirAdded(path: string) {
         this.log.log(`Adding directory: ${path}`);
-        this.tree.addEmptyDirectory(path);
+        this._tree.addEmptyDirectory(path);
         this.options.onDirAdded(path);
     }
 
-    private onFileAdded(path: string, stats?: FS.Stats) {
+    private async onFileAdded(path: string, stats?: FS.Stats) {
         this.log.log(`Adding file: ${path}`);
-        const fileInfo = statsToFileData(FS.statSync(path));
-        this.tree.addFile(path, fileInfo);
+        const fileInfo = await this.getFileInfo(path);
+        this._tree.addFile(path, fileInfo);
         this.options.onFileAdded(path);
     }
 
-    private onFileChanged(path: string, stats?: FS.Stats) {
+    private async onFileChanged(path: string, stats?: FS.Stats) {
         this.log.log(`Changing file: ${path}`);
-        const fileInfo = statsToFileData(FS.statSync(path));
-        this.tree.updateFile(path, fileInfo);
-        this.options.onFileChanged(path);
+        const fileInfo = await this.getFileInfo(path);
+        const updateResult = this._tree.updateFile(path, fileInfo);
+        if(updateResult) {
+            this.options.onFileChanged(path);
+        }
     }
+
+    private getFileInfo = async (path: string) => {
+        const stats = await getStats(path);
+        if(stats) return null;
+        return statsToFileData(path, stats)
+    };
 
     public stop() {
         this.watcher.close();
         this.watcher = null;
     }
 
-    public getDirectoryTree() {
-        return this.tree;
+    public get tree() {
+        return this._tree;
+    }
+
+    public get topFiles() {
+        return this._topFiles;
     }
 
 }

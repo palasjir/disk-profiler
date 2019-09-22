@@ -42,7 +42,7 @@ export const ScanResults = observer(function ScanResult(): JSX.Element {
                                     <Typography variant="h5" gutterBottom>
                                         Largest Files
                                     </Typography>
-                                    <FsNodeTable infos={mainStore.topFiles} />
+                                    <FsNodeTable rootPath={mainStore.selectedDirectory} infos={mainStore.topFiles} />
                                 </div>
                             </Grid>
                             <Grid item>

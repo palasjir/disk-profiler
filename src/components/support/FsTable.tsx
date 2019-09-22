@@ -3,10 +3,17 @@ import * as React from 'react';
 import {FileInfo} from '../../commons/types';
 import {formatSize} from '../../utils/format';
 import * as moment from 'moment';
+import * as PATH from 'path';
+import {OpenInFileExplorerButton} from './buttons';
 
 
 interface FsNodeTableProps {
+    readonly rootPath: string;
     readonly infos?: FileInfo[];
+}
+
+function relativePath(rootPath: string, path: string) {
+    return `...${PATH.sep}${PATH.relative(rootPath, path)}`;
 }
 
 export function FsNodeTable(props: FsNodeTableProps): JSX.Element | null {
@@ -24,10 +31,11 @@ export function FsNodeTable(props: FsNodeTableProps): JSX.Element | null {
             </TableHead>
             <TableBody>
                 {props.infos.map(info => (
-                    <TableRow key={info.path}>
-                        <TableCell component="th" scope="row">{info.path}</TableCell>
+                    <TableRow key={info.normalizedPath}>
+                        <TableCell component="th" scope="row">{relativePath(props.rootPath, info.originalPath)}</TableCell>
                         <TableCell>{formatSize(info.size)}</TableCell>
                         <TableCell>{moment(info.lastModified).startOf('hour').fromNow()}</TableCell>
+                        <TableCell><OpenInFileExplorerButton fullPath={info.originalPath} /></TableCell>
                     </TableRow>
                 ))}
             </TableBody>

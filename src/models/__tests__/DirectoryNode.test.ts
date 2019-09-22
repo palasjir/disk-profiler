@@ -1,22 +1,19 @@
 import DirectoryNode from '../DirectoryNode';
 import {FileInfo} from '../../commons/types';
 
-const defaultFileData: FileInfo = {size: 500, lastModified: 0};
+const defaultFileData = {size: 500, lastModified: 0};
+const fileData = (p: string): FileInfo => ({...defaultFileData, originalPath: p, normalizedPath: p});
 
 describe('DirectoryNode', () => {
 
     describe('addFile', () => {
         test('adds non existing file', () => {
             const sut = new DirectoryNode('.');
-            const nodeData: FileInfo = {
-                size: 1024,
-                lastModified: 0
-            };
-            sut.addFile('file1', nodeData);
+            sut.addFile('file1', fileData('file1'));
             expect(sut.getNumberOfDirectories()).toEqual(0);
             expect(sut.getNumberOfFiles()).toEqual(1);
 
-            sut.addFile('file2', nodeData);
+            sut.addFile('file2', fileData('file2'));
             expect(sut.getNumberOfDirectories()).toEqual(0);
             expect(sut.getNumberOfFiles()).toEqual(2);
         });
@@ -24,12 +21,16 @@ describe('DirectoryNode', () => {
         test('adding file updates size', () => {
             const sut = new DirectoryNode('.');
             sut.addFile('file1', {
+                originalPath: 'file1',
+                normalizedPath: 'file1',
                 size: 2000,
                 lastModified: 0
             });
             expect(sut.sizeInBytes).toEqual(2000);
 
             sut.addFile('file2', {
+                originalPath: 'file2',
+                normalizedPath: 'file2',
                 size: 3000,
                 lastModified: 0
             });
@@ -39,26 +40,26 @@ describe('DirectoryNode', () => {
         test('adding file updates total number of files', () => {
             const sut = new DirectoryNode('.');
             expect(sut.totalNumberOfFiles).toEqual(0);
-            sut.addFile('file1', defaultFileData);
+            sut.addFile('file1', fileData('file1'));
             expect(sut.totalNumberOfFiles).toEqual(1);
         });
 
         test('adding file updates total number of files in parent', () => {
             const sut = new DirectoryNode('.');
-            sut.addFile('file1', defaultFileData);
-            sut.addFile('file2', defaultFileData);
+            sut.addFile('file1', fileData('file1'));
+            sut.addFile('file2', fileData('file2'));
 
             const directory = sut.addEmptyDirectory('folder');
             expect(sut.totalNumberOfFiles).toEqual(2);
-            directory.addFile('file3', defaultFileData);
+            directory.addFile('file3', fileData('file3'));
             expect(sut.totalNumberOfFiles).toEqual(3);
         });
 
         test('adding same file twice does not increase total number of files', () => {
             const sut = new DirectoryNode('.');
-            sut.addFile('file1', defaultFileData);
+            sut.addFile('file1', fileData('file1'));
             expect(sut.totalNumberOfFiles).toEqual(1);
-            sut.addFile('file1', defaultFileData);
+            sut.addFile('file1', fileData('file2'));
             expect(sut.totalNumberOfFiles).toEqual(1);
         });
 
@@ -99,8 +100,8 @@ describe('DirectoryNode', () => {
             expect(sut.getDirectory('folder1')).not.toBeDefined();
 
             const folder = new DirectoryNode('folder1');
-            folder.addFile('file1', { size: 500, lastModified: 0});
-            folder.addFile('file2', { size: 500, lastModified: 0});
+            folder.addFile('file1', fileData('file1'));
+            folder.addFile('file2', fileData('file2'));
 
             sut.setDirectory('folder1', folder);
             expect(sut.getDirectory('folder1')).toBeDefined();
@@ -112,8 +113,8 @@ describe('DirectoryNode', () => {
             expect(sut.sizeInBytes).toEqual(0);
 
             const folder = new DirectoryNode('folder1');
-            folder.addFile('file1', { size: 500, lastModified: 0});
-            folder.addFile('file2', { size: 500, lastModified: 0});
+            folder.addFile('file1', fileData('file1'));
+            folder.addFile('file2', fileData('file2'));
 
             sut.setDirectory('folder1', folder);
             expect(sut.sizeInBytes).toEqual(1000);
@@ -125,15 +126,15 @@ describe('DirectoryNode', () => {
             expect(sut.sizeInBytes).toEqual(0);
 
             const folder = new DirectoryNode('folder1');
-            folder.addFile('file1', { size: 500, lastModified: 0});
-            folder.addFile('file2', { size: 500, lastModified: 0});
+            folder.addFile('file1', fileData('file1'));
+            folder.addFile('file2', fileData('file2'));
 
             sut.setDirectory('folder1', folder);
             expect(sut.sizeInBytes).toEqual(1000);
 
             const folder2 = new DirectoryNode('folder2');
-            folder2.addFile('file1', { size: 500, lastModified: 0});
-            folder2.addFile('file2', { size: 500, lastModified: 0});
+            folder2.addFile('file1', fileData('file1'));
+            folder2.addFile('file2', fileData('file2'));
 
             expect(sut.sizeInBytes).toEqual(1000);
         });
@@ -144,16 +145,16 @@ describe('DirectoryNode', () => {
             expect(sut.sizeInBytes).toEqual(0);
 
             const folder = new DirectoryNode('folder1');
-            folder.addFile('file1', { size: 500, lastModified: 0});
-            folder.addFile('file2', { size: 500, lastModified: 0});
+            folder.addFile('file1', fileData('file1'));
+            folder.addFile('file2', fileData('file2'));
 
             sut.setDirectory('folder1', folder);
             expect(sut.sizeInBytes).toEqual(1000);
 
             const updatedFolder1 = new DirectoryNode('folder1');
-            updatedFolder1.addFile('file1', { size: 500, lastModified: 0});
-            updatedFolder1.addFile('file2', { size: 500, lastModified: 0});
-            updatedFolder1.addFile('file3', { size: 500, lastModified: 0});
+            updatedFolder1.addFile('file1', fileData('file1'));
+            updatedFolder1.addFile('file2', fileData('file2'));
+            updatedFolder1.addFile('file3', fileData('file3'));
 
             sut.setDirectory('folder1', updatedFolder1);
             expect(sut.sizeInBytes).toEqual(1500);
@@ -165,14 +166,14 @@ describe('DirectoryNode', () => {
             expect(sut.sizeInBytes).toEqual(0);
 
             const parentFolder = new DirectoryNode('parentFolder');
-            parentFolder.addFile('file1', { size: 500, lastModified: 0});
-            parentFolder.addFile('file2', { size: 500, lastModified: 0});
+            parentFolder.addFile('file1', fileData('file1'));
+            parentFolder.addFile('file2', fileData('file2'));
             expect(parentFolder.sizeInBytes).toEqual(1000);
 
             const folder = new DirectoryNode('folder');
-            folder.addFile('file1', { size: 500, lastModified: 0});
-            folder.addFile('file2', { size: 500, lastModified: 0});
-            folder.addFile('file3', { size: 500, lastModified: 0});
+            folder.addFile('file1', fileData('file1'));
+            folder.addFile('file2', fileData('file2'));
+            folder.addFile('file3', fileData('file3'));
             expect(folder.sizeInBytes).toEqual(1500);
 
             parentFolder.setDirectory('folder', folder);
@@ -182,8 +183,8 @@ describe('DirectoryNode', () => {
             expect(sut.sizeInBytes).toEqual(2500);
 
             const updatedFolder = new DirectoryNode('folder');
-            updatedFolder.addFile('file1', { size: 500, lastModified: 0});
-            updatedFolder.addFile('file2', { size: 500, lastModified: 0});
+            updatedFolder.addFile('file1', fileData('file1'));
+            updatedFolder.addFile('file2', fileData('file2'));
             expect(updatedFolder.sizeInBytes).toEqual(1000);
 
             parentFolder.setDirectory('folder', updatedFolder);
@@ -193,7 +194,7 @@ describe('DirectoryNode', () => {
 
         test('setting not existing directory updates number of files and folder', () => {
             const sut = new DirectoryNode('.');
-            sut.addFile('file1', defaultFileData);
+            sut.addFile('file1', fileData('file1'));
             sut.addEmptyDirectory('folder1');
             sut.addEmptyDirectory('folder2');
 
@@ -201,8 +202,8 @@ describe('DirectoryNode', () => {
             expect(sut.totalNumberOfFiles).toEqual(1);
 
             const folder3 = new DirectoryNode('folder3');
-            folder3.addFile('file1', defaultFileData);
-            folder3.addFile('file2', defaultFileData);
+            folder3.addFile('file1', fileData('file1'));
+            folder3.addFile('file2', fileData('file2'));
             folder3.addEmptyDirectory('folder4');
             folder3.addEmptyDirectory('folder5');
 
@@ -214,7 +215,7 @@ describe('DirectoryNode', () => {
 
         test('setting existing directory updates number of files and folder', () => {
             const sut = new DirectoryNode('.');
-            sut.addFile('file1', defaultFileData);
+            sut.addFile('file1', fileData('file1'));
             sut.addEmptyDirectory('folder1');
             sut.addEmptyDirectory('folder2');
             sut.addEmptyDirectory('folder3');
@@ -223,8 +224,8 @@ describe('DirectoryNode', () => {
             expect(sut.totalNumberOfFiles).toEqual(1);
 
             const folder3 = new DirectoryNode('folder3');
-            folder3.addFile('file1', defaultFileData);
-            folder3.addFile('file2', defaultFileData);
+            folder3.addFile('file1', fileData('file1'));
+            folder3.addFile('file2', fileData('file2'));
             folder3.addEmptyDirectory('folder4');
             folder3.addEmptyDirectory('folder5');
 
@@ -260,10 +261,10 @@ describe('DirectoryNode', () => {
 
         test('removing directory with files updates size', () => {
             const sut = new DirectoryNode('.');
-            sut.addFile('file1', defaultFileData);
+            sut.addFile('file1', fileData('file1'));
             const folder1 =  sut.addEmptyDirectory('folder1');
-            folder1.addFile('file1', defaultFileData);
-            folder1.addFile('file2', defaultFileData);
+            folder1.addFile('file1', fileData('file1'));
+            folder1.addFile('file2', fileData('file2'));
 
             expect(sut.sizeInBytes).toEqual(1500);
 
@@ -273,11 +274,11 @@ describe('DirectoryNode', () => {
 
         test('removing nested directory with files updates size', () => {
             const sut = new DirectoryNode('.');
-            sut.addFile('file1', defaultFileData);
+            sut.addFile('file1', fileData('file1'));
             const folder1 =  sut.addEmptyDirectory('folder1');
             const nested = folder1.addEmptyDirectory('nested');
-            nested.addFile('file1', defaultFileData);
-            nested.addFile('file2', defaultFileData);
+            nested.addFile('file1', fileData('file1'));
+            nested.addFile('file2', fileData('file2'));
 
             expect(sut.sizeInBytes).toEqual(1500);
 
@@ -287,10 +288,10 @@ describe('DirectoryNode', () => {
 
         test('removing directory updates number of files and directories', () => {
             const sut = new DirectoryNode('.');
-            sut.addFile('file1', defaultFileData);
+            sut.addFile('file1', fileData('file1'));
             const folder = sut.addEmptyDirectory('folder1');
-            folder.addFile('file1', defaultFileData);
-            folder.addFile('file2', defaultFileData);
+            folder.addFile('file1', fileData('file1'));
+            folder.addFile('file2', fileData('file2'));
 
             expect(sut.totalNumberOfFiles).toEqual(3);
             expect(sut.totalNumberOfDirectories).toEqual(1);
@@ -303,13 +304,13 @@ describe('DirectoryNode', () => {
 
         test('removing nested directory updates number of files and directories in root', () => {
             const sut = new DirectoryNode('.');
-            sut.addFile('file1', defaultFileData);
+            sut.addFile('file1', fileData('file1'));
             const folder = sut.addEmptyDirectory('folder1');
-            folder.addFile('file1', defaultFileData);
-            folder.addFile('file2', defaultFileData);
+            folder.addFile('file1', fileData('file1'));
+            folder.addFile('file2', fileData('file2'));
             const nested = folder.addEmptyDirectory('nested');
-            nested.addFile('file1', defaultFileData);
-            nested.addFile('file2', defaultFileData);
+            nested.addFile('file1', fileData('file1'));
+            nested.addFile('file2', fileData('file2'));
 
             expect(sut.totalNumberOfFiles).toEqual(5);
             expect(sut.totalNumberOfDirectories).toEqual(2);
@@ -327,7 +328,7 @@ describe('DirectoryNode', () => {
 
         test('removes existing file', () => {
             const sut = new DirectoryNode('.');
-            sut.addFile('file1', defaultFileData);
+            sut.addFile('file1', fileData('file1'));
             expect(sut.getNumberOfFiles()).toEqual(1);
             sut.removeFile('file1');
             expect(sut.getNumberOfFiles()).toEqual(0);
@@ -335,7 +336,7 @@ describe('DirectoryNode', () => {
 
         test('does nothing when removing non existing file', () => {
             const sut = new DirectoryNode('.');
-            sut.addFile('file1', defaultFileData);
+            sut.addFile('file1', fileData('file1'));
             expect(sut.getNumberOfFiles()).toEqual(1);
             sut.removeFile('file2');
             expect(sut.getNumberOfFiles()).toEqual(1);
@@ -343,7 +344,7 @@ describe('DirectoryNode', () => {
 
         test('updates size when file removed', () => {
             const sut = new DirectoryNode('.');
-            sut.addFile('file1', defaultFileData);
+            sut.addFile('file1', fileData('file1'));
             expect(sut.sizeInBytes).toEqual(500);
             sut.removeFile('file1');
             expect(sut.sizeInBytes).toEqual(0);
@@ -351,11 +352,11 @@ describe('DirectoryNode', () => {
 
         test('updates parent size when file removed', () => {
             const sut = new DirectoryNode('.');
-            sut.addFile('file1', defaultFileData);
+            sut.addFile('file1', fileData('file1'));
 
             const folder = new DirectoryNode('folder');
-            folder.addFile('file1', { size: 500, lastModified: 0});
-            folder.addFile('file2', { size: 500, lastModified: 0});
+            folder.addFile('file1', fileData('file1'));
+            folder.addFile('file2', fileData('file2'));
             sut.setDirectory('folder', folder);
 
             expect(sut.sizeInBytes).toEqual(1500);
@@ -365,11 +366,11 @@ describe('DirectoryNode', () => {
 
         test('does not update parent size when file does not exist', () => {
             const sut = new DirectoryNode('.');
-            sut.addFile('file1', defaultFileData);
+            sut.addFile('file1', fileData('file1'));
 
             const folder = new DirectoryNode('folder');
-            folder.addFile('file1', { size: 500, lastModified: 0});
-            folder.addFile('file2', { size: 500, lastModified: 0});
+            folder.addFile('file1', fileData('file1'));
+            folder.addFile('file2', fileData('file2'));
             sut.setDirectory('folder', folder);
 
             expect(sut.sizeInBytes).toEqual(1500);
@@ -379,8 +380,8 @@ describe('DirectoryNode', () => {
 
         test('removing file updates total number of files in node', () => {
             const sut = new DirectoryNode('.');
-            sut.addFile('file1', defaultFileData);
-            sut.addFile('file2', defaultFileData);
+            sut.addFile('file1', fileData('file1'));
+            sut.addFile('file2', fileData('file2'));
 
             expect(sut.totalNumberOfFiles).toEqual(2);
             sut.removeFile('file1');
@@ -389,8 +390,8 @@ describe('DirectoryNode', () => {
 
         test('removing file non existing files does not update total number of files in node', () => {
             const sut = new DirectoryNode('.');
-            sut.addFile('file1', defaultFileData);
-            sut.addFile('file2', defaultFileData);
+            sut.addFile('file1', fileData('file1'));
+            sut.addFile('file2', fileData('file2'));
 
             expect(sut.totalNumberOfFiles).toEqual(2);
             sut.removeFile('nonExisting');
@@ -400,8 +401,8 @@ describe('DirectoryNode', () => {
         test('removing nested file update total number of files in root node', () => {
             const sut = new DirectoryNode('.');
             const nested = sut.addEmptyDirectory('nested');
-            nested.addFile('file1', defaultFileData);
-            nested.addFile('file2', defaultFileData);
+            nested.addFile('file1', fileData('file1'));
+            nested.addFile('file2', fileData('file2'));
 
             expect(sut.totalNumberOfFiles).toEqual(2);
             nested.removeFile('file1');

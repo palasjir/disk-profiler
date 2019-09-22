@@ -51,7 +51,8 @@ export interface FileInfo {
     size: number;
     lastModified: number;
     lastModifiedFormated?: Date;
-    path?: string;
+    originalPath: string;
+    normalizedPath: string;
 }
 
 export interface DirInfo {

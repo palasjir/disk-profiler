@@ -1,5 +1,6 @@
-import {createDirectoryTreeWatcher, WatcherOptions} from '../src/watcher/watcher';
+
 import {formatSize} from '../src/utils/format';
+import DirectoryWatcher, {WatcherOptions} from '../src/watcher/DirectoryWatcher';
 
 const pathToScan1 = "/Users/jirpal/Downloads/skolka-praminek";
 const pathToScan2 = "/Users/jirpal/dev/skolka-praminek";
@@ -11,17 +12,17 @@ let isReady = false;
 const watcherOptions: WatcherOptions = {
     onDirRemoved(path: string): void {
         if(isReady) {
-            console.log('dir removed', path, formatSize(tree.head.sizeInBytes));
+            console.log('dir removed', path, formatSize(watcher.tree.head.sizeInBytes));
         }
     },
     onDirAdded(path: string): void {
         if(isReady) {
-            console.log('dir added', path, formatSize(tree.head.sizeInBytes));
+            console.log('dir added', path, formatSize(watcher.tree.head.sizeInBytes));
         }
     },
     onFileRemoved(path: string): void {
         if(isReady) {
-            console.log('file removed', path, formatSize(tree.head.sizeInBytes));
+            console.log('file removed', path, formatSize(watcher.tree.head.sizeInBytes));
         }
     },
     onFileChanged(path: string): void {
@@ -29,13 +30,13 @@ const watcherOptions: WatcherOptions = {
     },
     onFileAdded(path: string): void {
         if(isReady) {
-            console.log('file added', path, formatSize(tree.head.sizeInBytes));
+            console.log('file added', path, formatSize(watcher.tree.head.sizeInBytes));
         }
     },
     onReady(): void {
         isReady = true;
-        console.dir(tree);
+        console.dir(watcher.tree);
     }
 };
 
-const [watcher, tree] = createDirectoryTreeWatcher(pathToScan, watcherOptions);
+const watcher = new DirectoryWatcher(pathToScan, watcherOptions);

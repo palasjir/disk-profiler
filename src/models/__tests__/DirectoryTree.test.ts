@@ -1,9 +1,11 @@
 import DirectoryTree from '../DirectoryTree';
 import {FileInfo} from '../../commons/types';
-import DirectoryNode from '../DirectoryNode';
 
 const rootPath  = '/root/path';
-const defaultFileData: FileInfo = { size: 500, lastModified: 0};
+const defaultFileData = { size: 500, lastModified: 0};
+
+const path = (p: string) => rootPath + p;
+const fileData = (p: string): FileInfo => ({...defaultFileData, originalPath: path(p), normalizedPath: path(p)});
 
 describe('DirectoryTree', () => {
 
@@ -62,7 +64,7 @@ describe('DirectoryTree', () => {
             expect(sut.head.totalNumberOfFiles).toEqual(0);
             expect(sut.head.totalNumberOfDirectories).toEqual(0);
 
-            sut.addFile(`${rootPath}/nested1/file.txt`, defaultFileData);
+            sut.addFile(`${rootPath}/nested1/file.txt`, fileData('/nested1/file.txt'));
 
             expect(sut.head.totalNumberOfFiles).toEqual(1);
             expect(sut.head.totalNumberOfDirectories).toEqual(1);
@@ -70,12 +72,12 @@ describe('DirectoryTree', () => {
 
         test("adding file to nested directory that exists increases total number of directories and files", () => {
             let sut = new DirectoryTree(rootPath);
-            sut.addEmptyDirectory(`${rootPath}/dir1`);
+            sut.addEmptyDirectory(path('/dir1'));
 
             expect(sut.head.totalNumberOfFiles).toEqual(0);
             expect(sut.head.totalNumberOfDirectories).toEqual(1);
 
-            sut.addFile(`${rootPath}/dir1/nested1/file.txt`, defaultFileData);
+            sut.addFile(path('/dir1/nested1/file.txt'), fileData('/dir/nested1/file.txt'));
 
             expect(sut.head.totalNumberOfFiles).toEqual(1);
             expect(sut.head.totalNumberOfDirectories).toEqual(2);
@@ -88,7 +90,7 @@ describe('DirectoryTree', () => {
         test('removes directory from structure', () => {
             const sut = new DirectoryTree(rootPath);
 
-            sut.addFile(`${rootPath}/folder1/file1.txt`, { size: 500, lastModified: 0});
+            sut.addFile(path('/folder1/file1.txt'), fileData('/folder1/file1.txt'));
             expect(sut.head.getNumberOfDirectories()).toEqual(1);
 
             sut.removeDirectory(`${rootPath}/folder1`);
@@ -98,7 +100,7 @@ describe('DirectoryTree', () => {
         test('removing directory updates size', () => {
             const sut = new DirectoryTree(rootPath);
 
-            sut.addFile(`${rootPath}/folder1/file1.txt`, { size: 500, lastModified: 0});
+            sut.addFile(path('/folder1/file1.txt'), fileData('/folder1/file1.txt'));
             expect(sut.head.sizeInBytes).toEqual(500);
 
             sut.removeDirectory(`${rootPath}/folder1`);
@@ -113,8 +115,8 @@ describe('DirectoryTree', () => {
             
             const sut = new DirectoryTree(rootPath);
 
-            sut.addFile(`${rootPath}/file1.txt`, { size: 500, lastModified: 0});
-            sut.addFile(`${rootPath}/file2.txt`, { size: 500, lastModified: 0});
+            sut.addFile(`${rootPath}/file1.txt`, fileData('/file1.txt'));
+            sut.addFile(`${rootPath}/file2.txt`, fileData('file2.txt'));
             expect(sut.head.getNumberOfFiles()).toEqual(2);
 
             sut.removeFile(`${rootPath}/file1.txt`);
@@ -149,7 +151,7 @@ describe('DirectoryTree', () => {
         test("gives correct file when file exists", () => {
             const sut = new DirectoryTree(rootPath);
             const folder = sut.addEmptyDirectory(`${rootPath}/folder`);
-            const file = folder.addFile('file.txt', defaultFileData);
+            const file = folder.addFile('file.txt', fileData('/file.txt'));
             const found = sut.findFile(`${rootPath}/folder/file.txt`);
             expect(found).toBe(file);
         });
@@ -195,8 +197,8 @@ describe('DirectoryTree', () => {
         test("removes file from structure", () => {
             const sut = new DirectoryTree(rootPath);
             const folder = sut.addEmptyDirectory(`${rootPath}/folder`);
-            const file1 = folder.addFile('file1.txt', defaultFileData);
-            const file2 = folder.addFile('file2.txt', defaultFileData);
+            const file1 = folder.addFile('file1.txt', fileData('/file.txt'));
+            const file2 = folder.addFile('file2.txt', fileData('/file.txt'));
             const removed = sut.removeFile(`${rootPath}/folder/file1.txt`);
 
             expect(removed).toBe(file1);
@@ -207,8 +209,8 @@ describe('DirectoryTree', () => {
         test("doesnt cause any side effect when file does not exist", () => {
             const sut = new DirectoryTree(rootPath);
             const folder = sut.addEmptyDirectory(`${rootPath}/folder`);
-            const file1 = folder.addFile('file1.txt', defaultFileData);
-            const file2 = folder.addFile('file2.txt', defaultFileData);
+            const file1 = folder.addFile('file1.txt', fileData('/file1.txt'));
+            const file2 = folder.addFile('file2.txt', fileData('/file2.txt'));
             const removed = sut.removeFile(`${rootPath}/folder/doesNotExist.txt`);
 
             expect(removed).toBeUndefined();

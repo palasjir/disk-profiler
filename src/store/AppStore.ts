@@ -8,9 +8,8 @@ import {
     ToScannerMessage,
     ToScannerMessageType
 } from '../commons/types';
-import {action, computed, IObservableArray, observable} from 'mobx';
+import {action, computed, observable} from 'mobx';
 import {EVENT_MSG_TO_APP, EVENT_MSG_TO_SCANNER} from '../commons/constants';
-import FileNode from '../models/FileNode';
 
 async function openSelectDirectoryDialog(): Promise<OpenDialogReturnValue> {
     return remote.dialog.showOpenDialog({ properties: ['openDirectory'] })
@@ -132,4 +131,7 @@ export class AppStore {
         }
     }
 
+    public revealInFileExplorer(fullPath: string) {
+        remote.shell.showItemInFolder(fullPath);
+    }
 }

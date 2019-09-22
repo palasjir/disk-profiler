@@ -68,7 +68,7 @@ describe('Directory Watcher - integration tests', () => {
 
     test('reads initial structure', async () => {
         await watcher.start();
-        const tree = watcher.getDirectoryTree();
+        const tree = watcher.tree;
 
         expect(tree.head.totalNumberOfDirectories).toEqual(INIT_DIR_NUMBER);
         expect(tree.head.totalNumberOfFiles).toEqual(INIT_FILE_NUMBER);
@@ -77,7 +77,7 @@ describe('Directory Watcher - integration tests', () => {
 
     test('watches directory removal - empty directory', async () => {
         await watcher.start();
-        const tree = watcher.getDirectoryTree();
+        const tree = watcher.tree;
 
         FS.rmdirSync(path('/dir2'));
 
@@ -90,7 +90,7 @@ describe('Directory Watcher - integration tests', () => {
 
     test('watches directory removal - contains files', async () => {
         await watcher.start();
-        const tree = watcher.getDirectoryTree();
+        const tree = watcher.tree;
 
         rimraf.sync(path('/dir3'));
 
@@ -103,7 +103,7 @@ describe('Directory Watcher - integration tests', () => {
 
     test('watches directory removal - contains files and directories', async () => {
         await watcher.start();
-        const tree = watcher.getDirectoryTree();
+        const tree = watcher.tree;
 
         rimraf.sync(path('/dir1'));
 
@@ -116,7 +116,7 @@ describe('Directory Watcher - integration tests', () => {
 
     test('watches file removal', async () => {
         await watcher.start();
-        const tree = watcher.getDirectoryTree();
+        const tree = watcher.tree;
 
         FS.unlinkSync(path('/file1.txt'));
 
@@ -136,7 +136,7 @@ describe('Directory Watcher - integration tests', () => {
 
     test('watches file creation', async () => {
         await watcher.start();
-        const tree = watcher.getDirectoryTree();
+        const tree = watcher.tree;
 
         FS.appendFileSync(path('/newfile1.txt'), DEFAULT_FILE_CONTENT);
 
@@ -156,7 +156,7 @@ describe('Directory Watcher - integration tests', () => {
 
     test('watches directory creation', async () => {
         await watcher.start();
-        const tree = watcher.getDirectoryTree();
+        const tree = watcher.tree;
 
         FS.mkdirSync(path('/newdir1'));
 
@@ -174,7 +174,7 @@ describe('Directory Watcher - integration tests', () => {
 
     test('watches file change', async () => {
         await watcher.start();
-        const tree = watcher.getDirectoryTree();
+        const tree = watcher.tree;
 
         expect(tree.head.sizeInBytes).toEqual(72);
 
