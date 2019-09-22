@@ -87,7 +87,7 @@ export default class DirectoryWatcher {
         })
     }
 
-    public async initTopFiles() {
+    public initTopFiles() {
         const files = extractFileListFromTree(this.tree);
         this._topFiles = new SortedFileList(files);
     }
@@ -115,7 +115,9 @@ export default class DirectoryWatcher {
         if(removed && this._topFiles) {
             this._topFiles.remove(removed.info);
         }
-        this.options.onFileRemoved(path);
+        if(removed) {
+            this.options.onFileRemoved(path);
+        }
     }
 
     private onDirAdded(path: string) {
@@ -146,12 +148,6 @@ export default class DirectoryWatcher {
         }
     }
 
-    private getFileInfo = async (path: string) => {
-        const stats = await getStats(path);
-        if(!stats) return null;
-        return statsToFileData(path, stats)
-    };
-
     public stop() {
         this.watcher.close();
         this.watcher = null;
@@ -162,6 +158,7 @@ export default class DirectoryWatcher {
     }
 
     public get topFiles() {
+        if(!this._topFiles) return [];
         return this._topFiles.getRange(this.showNumberOfFiles);
     }
 

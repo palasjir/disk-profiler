@@ -1,6 +1,7 @@
 import * as FS from 'fs';
 import * as PATH from 'path';
 import DirectoryWatcher from '../src/watcher/DirectoryWatcher';
+import {statsToFileData} from '../src/utils/stats';
 
 const rimraf = require('rimraf');
 
@@ -124,6 +125,7 @@ describe('Directory Watcher - integration tests', () => {
         expect(tree.head.totalNumberOfDirectories).toEqual(INIT_DIR_NUMBER);
         expect(tree.head.totalNumberOfFiles).toEqual(INIT_FILE_NUMBER - 1);
         expect(tree.head.sizeInBytes).toEqual(INIT_BYTE_SIZE - DEFAULT_FILE_SIZE);
+        expect(watcher.topFiles).toContain({})
 
         FS.unlinkSync(path('/dir1/dir4/file5.txt'));
 
@@ -131,6 +133,7 @@ describe('Directory Watcher - integration tests', () => {
         expect(tree.head.totalNumberOfDirectories).toEqual(INIT_DIR_NUMBER);
         expect(tree.head.totalNumberOfFiles).toEqual(INIT_FILE_NUMBER - 2);
         expect(tree.head.sizeInBytes).toEqual(INIT_BYTE_SIZE - 2 * DEFAULT_FILE_SIZE);
+        expect(watcher.topFiles).toContain({});
 
     }, 20000);
 
@@ -191,6 +194,31 @@ describe('Directory Watcher - integration tests', () => {
         expect(tree.head.totalNumberOfDirectories).toEqual(INIT_DIR_NUMBER);
         expect(tree.head.totalNumberOfFiles).toEqual(INIT_FILE_NUMBER);
         expect(tree.head.sizeInBytes).toEqual(100);
+
+    }, 20000);
+
+    test('watches file removal - top files', async () => {
+        await watcher.start();
+        const tree = watcher.tree;
+        watcher.initTopFiles();
+
+        const stats = statsToFileData(path('file1.txt'), FS.statSync(path('/file1.txt')));
+        FS.unlinkSync(path('/file1.txt'));
+
+        await delay(5000);
+        expect(tree.head.totalNumberOfDirectories).toEqual(INIT_DIR_NUMBER);
+        expect(tree.head.totalNumberOfFiles).toEqual(INIT_FILE_NUMBER - 1);
+        expect(tree.head.sizeInBytes).toEqual(INIT_BYTE_SIZE - DEFAULT_FILE_SIZE);
+        expect(watcher.topFiles).not.toContain(stats);
+
+        const stats2 = statsToFileData(path('/dir1/dir4/file5.txt'), FS.statSync(path('/dir1/dir4/file5.txt')));
+        FS.unlinkSync(path('/dir1/dir4/file5.txt'));
+
+        await delay(5000);
+        expect(tree.head.totalNumberOfDirectories).toEqual(INIT_DIR_NUMBER);
+        expect(tree.head.totalNumberOfFiles).toEqual(INIT_FILE_NUMBER - 2);
+        expect(tree.head.sizeInBytes).toEqual(INIT_BYTE_SIZE - 2 * DEFAULT_FILE_SIZE);
+        expect(watcher.topFiles).not.toContain(stats2);
 
     }, 20000);
 

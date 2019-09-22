@@ -76,7 +76,9 @@ export default class DirectoryNode {
         if(!fileToRemove) return undefined;
 
         updateDirInfoUp(this, createRemoveFileUpdater(fileToRemove));
-        this.files.delete(name);
+        if (!this.files.delete(name)) {
+            return undefined;
+        }
 
         return fileToRemove;
     }
