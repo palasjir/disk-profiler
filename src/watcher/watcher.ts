@@ -6,17 +6,19 @@ import {getStats} from '../utils/scanner';
 
 
 export interface WatcherOptions {
+    debug?: boolean;
+    debugAfterReady?: boolean;
     onFileAdded?(path: string): void;
     onFileChanged?(path: string): void;
     onFileRemoved?(path: string): void;
     onDirAdded?(path: string): void;
     onDirRemoved?(path: string): void;
     onReady?(): void;
-    onError?(error: any): void;
+    onError?(error?: any): void;
 }
 
 
-function statsToFileData(stats?: FS.Stats): FileInfo {
+export function statsToFileData(stats?: FS.Stats): FileInfo {
     if(!stats) {
         return {
             size: 0,
@@ -34,6 +36,7 @@ export function createDirectoryTreeWatcher(path: string, options?: WatcherOption
     const tree = new DirectoryTree(path);
 
     const watcherOptions: WatcherOptions = {
+        debug: false,
         onDirRemoved(path: string): void {
             tree.removeDirectory(path);
             if(options.onDirRemoved) {
@@ -58,13 +61,13 @@ export function createDirectoryTreeWatcher(path: string, options?: WatcherOption
             }
         },
         onFileAdded(path: string): void {
-            const stats = getStats(path);
-            const fileData = statsToFileData(stats);
-
-            tree.addFile(path, fileData);
-            if(options.onFileAdded) {
-                options.onFileAdded(path);
-            }
+            // const stats = getStats(path);
+            // const fileData = statsToFileData(stats);
+            //
+            // tree.addFile(path, fileData);
+            // if(options.onFileAdded) {
+            //     options.onFileAdded(path);
+            // }
         },
         onReady(): void {
             if(options.onReady) {
@@ -89,13 +92,13 @@ export function createFileWatcher(path: string, options: WatcherOptions) {
     });
 
     watcher
+        .on('error', options.onError)
+        .on('ready', options.onReady)
         .on('unlinkDir', options.onDirRemoved)
+        .on('unlink', options.onFileRemoved)
         .on('addDir', options.onDirAdded)
         .on('add', options.onFileAdded)
-        .on('unlink', options.onFileRemoved)
-        .on('change', options.onFileChanged)
-        .on('ready', options.onReady)
-        .on('error', options.onError);
+        .on('change', options.onFileChanged);
 
     return watcher;
 }

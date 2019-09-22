@@ -1,6 +1,7 @@
 import DirectoryNode from './DirectoryNode';
 import FileNode from './FileNode';
 import {DirInfo} from '../commons/types';
+import {start} from 'repl';
 
 export function emptyMeta(): DirInfo {
     return {
@@ -29,6 +30,14 @@ export function updateDirInfo(oldValue: DirInfo, updater?: DirInfoUpdater): DirI
         }
     }
     return updates;
+}
+
+export function updateDirInfoUp(startNode: DirectoryNode, updater: DirInfoUpdater): void {
+    let currentNode: DirectoryNode = startNode;
+    while(currentNode != null) {
+        currentNode.dirInfo = updateDirInfo(currentNode.dirInfo, updater);
+        currentNode = currentNode.parent;
+    }
 }
 
 export function createSetDirectoryUpdater(newDir: DirectoryNode, oldDir?: DirectoryNode): DirInfoUpdater {

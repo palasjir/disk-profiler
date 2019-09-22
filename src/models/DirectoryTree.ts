@@ -32,17 +32,33 @@ export default class DirectoryTree {
         return this.createDirectoryStructure(pathFragments);
     }
 
-    public addFile(path: string, data: FileInfo): DirectoryTree {
+    /**
+     *
+     * @param path
+     * @param data
+     * @return added file or null if no file
+     */
+    public addFile(path: string, data: FileInfo): FileNode | null {
         if(!this.hasSameRoot(path)){
-            return this;
+            return null;
         }
         const pathFragments = this.getPathFragments(path);
         const directories = pathFragments.slice(0, pathFragments.length - 1);
 
         const currentNode = this.createDirectoryStructure(directories);
-        currentNode.addFile(pathFragments[pathFragments.length - 1], data);
+        return currentNode.addFile(pathFragments[pathFragments.length - 1], data);
+    }
 
-        return this;
+    public updateFile(path: string, newFileInfo: FileInfo): FileNode | null {
+        if(!this.hasSameRoot(path)){
+            return null;
+        }
+        const file = this.findFile(path);
+        if (!file) {
+            return null;
+        }
+        file.info = newFileInfo;
+        return file;
     }
 
     public removeDirectory(path: string): DirectoryNode {

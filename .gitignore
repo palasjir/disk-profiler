@@ -90,3 +90,5 @@ typings/
 .dynamodb/
 
 dist/
+tests/fix
+tests/fixture

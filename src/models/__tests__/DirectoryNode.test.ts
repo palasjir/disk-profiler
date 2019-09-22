@@ -61,6 +61,7 @@ describe('DirectoryNode', () => {
             sut.addFile('file1', defaultFileData);
             expect(sut.totalNumberOfFiles).toEqual(1);
         });
+
     });
 
     describe('addDirectory', () => {

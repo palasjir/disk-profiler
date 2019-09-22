@@ -1,5 +1,6 @@
 import DirectoryTree from '../DirectoryTree';
 import {FileInfo} from '../../commons/types';
+import DirectoryNode from '../DirectoryNode';
 
 const rootPath  = '/root/path';
 const defaultFileData: FileInfo = { size: 500, lastModified: 0};
@@ -55,6 +56,32 @@ describe('DirectoryTree', () => {
 
     });
 
+    describe('addFile()', () => {
+        test("adding file to nested directory that does't exist increases total number of directories and files", () => {
+            let sut = new DirectoryTree(rootPath);
+            expect(sut.head.totalNumberOfFiles).toEqual(0);
+            expect(sut.head.totalNumberOfDirectories).toEqual(0);
+
+            sut.addFile(`${rootPath}/nested1/file.txt`, defaultFileData);
+
+            expect(sut.head.totalNumberOfFiles).toEqual(1);
+            expect(sut.head.totalNumberOfDirectories).toEqual(1);
+        });
+
+        test("adding file to nested directory that exists increases total number of directories and files", () => {
+            let sut = new DirectoryTree(rootPath);
+            sut.addEmptyDirectory(`${rootPath}/dir1`);
+
+            expect(sut.head.totalNumberOfFiles).toEqual(0);
+            expect(sut.head.totalNumberOfDirectories).toEqual(1);
+
+            sut.addFile(`${rootPath}/dir1/nested1/file.txt`, defaultFileData);
+
+            expect(sut.head.totalNumberOfFiles).toEqual(1);
+            expect(sut.head.totalNumberOfDirectories).toEqual(2);
+        });
+
+    });
 
     describe('removeDirectory', () => {
 
@@ -97,7 +124,6 @@ describe('DirectoryTree', () => {
         });
 
     });
-    
     
     describe('findDirectory', () => {
        

@@ -1,11 +1,9 @@
 import * as FS from "fs";
+import * as UTIL from 'util';
 
-export function getStats(path: string): FS.Stats | null {
-    let stats = null;
-    try {
-        stats = FS.statSync(path);
-    } catch (e) {
-        console.error(`Can't read stats for ${path}.`);
-    }
-    return stats;
+const stat = UTIL.promisify(FS.stat);
+
+export function getStats(path: string, stats?: FS.Stats): Promise<FS.Stats | null> {
+    if(stats) return Promise.resolve(stats);
+    return stat(path);
 }
