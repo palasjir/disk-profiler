@@ -12,10 +12,10 @@ Scans selected folder and calculates how much space it occupies.
 
 Prerequisites:
 
-- NodeJS v10+
-- `yarn` 
+- [NodeJS v10+](https://nodejs.org/en/)
+- [Yarn](https://yarnpkg.com/lang/en/) 
 
-To launch application launch following commands in console. It compiles and launches the application.
+To launch application launch following run commands in console. It compiles and launches the application.
 
 ```
 yarn install
