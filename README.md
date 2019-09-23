@@ -1,6 +1,12 @@
-# Disk profiler
+# Disk Profiler
 
-Scans disk size.
+Scans selected folder and calculates how much space it occupies.
+
+## Feature list
+- Total size
+- Calculates total number of files
+- Calculates total number of folders
+- List of largest files 
 
 ## How to run
 
