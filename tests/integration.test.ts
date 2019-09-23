@@ -125,7 +125,6 @@ describe('Directory Watcher - integration tests', () => {
         expect(tree.head.totalNumberOfDirectories).toEqual(INIT_DIR_NUMBER);
         expect(tree.head.totalNumberOfFiles).toEqual(INIT_FILE_NUMBER - 1);
         expect(tree.head.sizeInBytes).toEqual(INIT_BYTE_SIZE - DEFAULT_FILE_SIZE);
-        expect(watcher.topFiles).toContain({})
 
         FS.unlinkSync(path('/dir1/dir4/file5.txt'));
 
@@ -133,7 +132,6 @@ describe('Directory Watcher - integration tests', () => {
         expect(tree.head.totalNumberOfDirectories).toEqual(INIT_DIR_NUMBER);
         expect(tree.head.totalNumberOfFiles).toEqual(INIT_FILE_NUMBER - 2);
         expect(tree.head.sizeInBytes).toEqual(INIT_BYTE_SIZE - 2 * DEFAULT_FILE_SIZE);
-        expect(watcher.topFiles).toContain({});
 
     }, 20000);
 
