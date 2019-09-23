@@ -23,6 +23,9 @@ yarn start
 
 ## Running tests
 
+Integration tests located under `test` directory.
+Unit test located under `__test__` directories that are located under `src` directories.
+
 ```
 yarn install
 yarn test
