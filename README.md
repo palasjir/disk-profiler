@@ -1,12 +1,14 @@
 # Disk Profiler
 
-Scans selected folder and calculates how much space it occupies.
+[Electron](https://electronjs.org/) application that scans selected folder and calculates how much space it occupies.
 
 ## Feature list
+
 - Total size
 - Calculates total number of files
 - Calculates total number of folders
 - List of largest files 
+
 
 ## How to run
 
@@ -21,6 +23,7 @@ To launch application launch following run commands in console. It compiles and 
 yarn install
 yarn start
 ```
+
 
 ## Running tests
 
