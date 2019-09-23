@@ -4,16 +4,13 @@ import * as util from 'lodash'
 export class SortedFileList {
 
     private list: FileInfo[];
-    private map = new Map();
-    private compare?: util.ValueIteratee<FileInfo>;
+    private map: Map<string, number> = new Map();
+    private compare: util.ValueIteratee<FileInfo>;
 
     public constructor(list: FileInfo[] = [], sorted: boolean = false) {
         this.compare = o => -o.size;
         this.list = sorted ? list : util.sortBy(list, this.compare);
-        for (const i in this.list) {
-            const item = list[i];
-           this.map.set(item.normalizedPath, i);
-        }
+        this.list.forEach((it, i) => this.map.set(it.normalizedPath, i));
     }
 
     private findIndex(file: FileInfo): number {
