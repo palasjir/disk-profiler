@@ -1,4 +1,3 @@
-
 import {formatSize} from '../src/utils/format';
 import DirectoryWatcher, {WatcherOptions} from '../src/watcher/DirectoryWatcher';
 
