@@ -11,8 +11,9 @@ Scans selected folder and calculates how much space it occupies.
 ## How to run
 
 Prerequisites:
-    - NodeJS v10+
-    - `yarn` 
+
+- NodeJS v10+
+- `yarn` 
 
 To launch application launch following commands in console. It compiles and launches the application.
 
