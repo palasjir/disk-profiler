@@ -2,10 +2,7 @@
 import {formatSize} from '../src/utils/format';
 import DirectoryWatcher, {WatcherOptions} from '../src/watcher/DirectoryWatcher';
 
-const pathToScan1 = "/Users/jirpal/Downloads/skolka-praminek";
-const pathToScan2 = "/Users/jirpal/dev/skolka-praminek";
-
-const pathToScan = pathToScan2;
+const pathToScan = "";
 
 let isReady = false;
 
@@ -26,7 +23,9 @@ const watcherOptions: WatcherOptions = {
         }
     },
     onFileChanged(path: string): void {
-        // tree.updateFile();
+        if(isReady) {
+            console.log('file updated', path, formatSize(watcher.tree.head.sizeInBytes));
+        }
     },
     onFileAdded(path: string): void {
         if(isReady) {
