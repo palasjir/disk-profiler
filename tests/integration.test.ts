@@ -1,9 +1,9 @@
 import * as FS from "fs"
 import * as PATH from "path"
+import * as rimraf from "rimraf"
+
 import DirectoryWatcher from "../src/watcher/DirectoryWatcher"
 import {statsToFileData} from "../src/utils/stats"
-
-const rimraf = require("rimraf")
 
 const DEFAULT_FILE_CONTENT = "Hello world!"
 const INIT_FILE_NUMBER = 6
@@ -12,10 +12,10 @@ const DEFAULT_FILE_SIZE = 12
 const INIT_BYTE_SIZE = 72
 const rootPath = PATH.join(__dirname, "fixture")
 
-const path = (p: string) => PATH.join(rootPath, p)
+const path = (p: string): string => PATH.join(rootPath, p)
 
-const delay = async (time?: number) => {
-    return new Promise(resolve => {
+const delay = async (time?: number): Promise<void> => {
+    return new Promise((resolve): void => {
         const timer = time || 500
         setTimeout(resolve, timer)
     })
@@ -35,7 +35,7 @@ const delay = async (time?: number) => {
 ├── file1.txt
 └── file2.txt
  */
-function testSetup() {
+function testSetup(): void {
     FS.mkdirSync(rootPath)
 
     FS.mkdirSync(path("/dir1"))
@@ -203,7 +203,6 @@ describe("Directory Watcher - integration tests", () => {
 
     test("watches file removal - top files", async () => {
         await watcher.start()
-        const tree = watcher.tree
         watcher.initTopFiles()
 
         const stats = statsToFileData(

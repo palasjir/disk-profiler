@@ -7,6 +7,30 @@ import {
     ToScannerMessageType,
 } from "./commons/types"
 
+/**
+ * Creates hidden window to run second process within one process.
+ */
+function createScannerWindow(): Promise<BrowserWindow> {
+    return new Promise<BrowserWindow>((resolve): void => {
+        const scannerWindow = new BrowserWindow({
+            width: 50,
+            height: 50,
+            show: false,
+            webPreferences: {
+                nodeIntegration: true,
+            },
+        })
+        scannerWindow.on("closed", () => {
+            console.log("Scanner closed.")
+        })
+        scannerWindow.loadFile("scanner.html")
+        scannerWindow.once("ready-to-show", () => {
+            console.log("Scanner is ready to show.")
+            resolve(scannerWindow)
+        })
+    })
+}
+
 async function createMainWindow(
     scannerWindow: BrowserWindow
 ): Promise<BrowserWindow> {
@@ -24,7 +48,7 @@ async function createMainWindow(
         app.quit()
     })
 
-    async function cancelScanner() {
+    async function cancelScanner(): Promise<void> {
         const msg: ToAppMessage = {
             type: ToAppMessageType.CANCEL_IN_PROGRESS,
         }
@@ -61,30 +85,6 @@ async function createMainWindow(
     ipcMain.on(EVENT_MSG_TO_APP, toApp)
 
     return mainWindow
-}
-
-/**
- * Creates hidden window to run second process within one process.
- */
-function createScannerWindow(): Promise<BrowserWindow> {
-    return new Promise<BrowserWindow>(resolve => {
-        const scannerWindow = new BrowserWindow({
-            width: 50,
-            height: 50,
-            show: false,
-            webPreferences: {
-                nodeIntegration: true,
-            },
-        })
-        scannerWindow.on("closed", () => {
-            console.log("Scanner closed.")
-        })
-        scannerWindow.loadFile("scanner.html")
-        scannerWindow.once("ready-to-show", () => {
-            console.log("scanner is ready to show")
-            resolve(scannerWindow)
-        })
-    })
 }
 
 async function initialise(): Promise<void> {
