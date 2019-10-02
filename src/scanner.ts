@@ -1,3 +1,3 @@
-import ScannerProcess from './watcher/ScannerProcess';
+import ScannerProcess from "./watcher/ScannerProcess"
 
-new ScannerProcess().init();
+new ScannerProcess().init()

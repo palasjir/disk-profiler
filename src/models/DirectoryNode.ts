@@ -1,86 +1,91 @@
-import {DirInfo, FileInfo} from '../commons/types';
-import FileNode from './FileNode';
+import {DirInfo, FileInfo} from "../commons/types"
+import FileNode from "./FileNode"
 import {
     createAddEmptyDirectoryUpdater,
     createAddFileUpdater,
     createRemoveDirectoryUpdater,
     createRemoveFileUpdater,
-    createSetDirectoryUpdater, DirInfoUpdater,
-    emptyMeta, updateDirInfo, updateDirInfoUp,
-} from './DirInfoUpdater';
+    createSetDirectoryUpdater,
+    DirInfoUpdater,
+    emptyMeta,
+    updateDirInfo,
+    updateDirInfoUp,
+} from "./DirInfoUpdater"
 
 export default class DirectoryNode {
+    readonly name: string
+    readonly directories: Map<string, DirectoryNode> = new Map()
+    readonly files: Map<string, FileNode> = new Map()
 
-    readonly name: string;
-    readonly directories: Map<string, DirectoryNode> = new Map();
-    readonly files: Map<string, FileNode> = new Map();
-
-    parent: DirectoryNode = null;
-    dirInfo: DirInfo = emptyMeta();
+    parent: DirectoryNode = null
+    dirInfo: DirInfo = emptyMeta()
 
     constructor(name: string, parent?: DirectoryNode | null) {
-        this.name = name;
-        this.parent = parent || null;
+        this.name = name
+        this.parent = parent || null
     }
 
     public getDirectory(name: string): DirectoryNode | undefined {
-        return this.directories.get(name);
+        return this.directories.get(name)
     }
 
     public getFile(name: string): FileNode | undefined {
-        return this.files.get(name);
+        return this.files.get(name)
     }
 
     public addEmptyDirectory(name: string): DirectoryNode {
         if (this.directories.has(name)) {
-            return this.directories.get(name);
+            return this.directories.get(name)
         }
 
-        const newDir = new DirectoryNode(name, this);
-        this.directories.set(name, newDir);
+        const newDir = new DirectoryNode(name, this)
+        this.directories.set(name, newDir)
 
-        updateDirInfoUp(this, createAddEmptyDirectoryUpdater());
+        updateDirInfoUp(this, createAddEmptyDirectoryUpdater())
 
-        return newDir;
+        return newDir
     }
 
-    public setDirectory(name: string, newDir: DirectoryNode): DirectoryNode | null {
-        if(name !== newDir.name) {
+    public setDirectory(
+        name: string,
+        newDir: DirectoryNode
+    ): DirectoryNode | null {
+        if (name !== newDir.name) {
             // consistency check
-            return null;
+            return null
         }
 
-        const oldDir = this.getDirectory(name);
+        const oldDir = this.getDirectory(name)
 
-        this.directories.set(name, newDir);
-        newDir.parent = this;
+        this.directories.set(name, newDir)
+        newDir.parent = this
 
-        updateDirInfoUp(this, createSetDirectoryUpdater(newDir, oldDir));
+        updateDirInfoUp(this, createSetDirectoryUpdater(newDir, oldDir))
 
-        return newDir;
+        return newDir
     }
 
     public addFile(name: string, data: FileInfo): FileNode | undefined {
-        if(this.files.has(name)) {
-            return this.getFile(name);
+        if (this.files.has(name)) {
+            return this.getFile(name)
         }
-        const newFile = new FileNode(name, data, this);
-        this.files.set(name, newFile);
-        updateDirInfoUp(this, createAddFileUpdater(newFile));
+        const newFile = new FileNode(name, data, this)
+        this.files.set(name, newFile)
+        updateDirInfoUp(this, createAddFileUpdater(newFile))
 
-        return this.getFile(name);
+        return this.getFile(name)
     }
 
     public removeFile(name: string): FileNode | undefined {
-        const fileToRemove = this.getFile(name);
-        if(!fileToRemove) return undefined;
+        const fileToRemove = this.getFile(name)
+        if (!fileToRemove) return undefined
 
-        updateDirInfoUp(this, createRemoveFileUpdater(fileToRemove));
+        updateDirInfoUp(this, createRemoveFileUpdater(fileToRemove))
         if (!this.files.delete(name)) {
-            return undefined;
+            return undefined
         }
 
-        return fileToRemove;
+        return fileToRemove
     }
 
     /**
@@ -90,41 +95,41 @@ export default class DirectoryNode {
      * @return removed directory or undefined when there is nothing to remove
      */
     public removeDirectory(name: string): DirectoryNode | undefined {
-        const dirToRemove = this.getDirectory(name);
-        if(!dirToRemove){
-            return undefined;
+        const dirToRemove = this.getDirectory(name)
+        if (!dirToRemove) {
+            return undefined
         }
 
-        this.directories.delete(name);
-        updateDirInfoUp(this, createRemoveDirectoryUpdater(dirToRemove));
-        return dirToRemove;
+        this.directories.delete(name)
+        updateDirInfoUp(this, createRemoveDirectoryUpdater(dirToRemove))
+        return dirToRemove
     }
 
     public hasDirectory(name: string): boolean {
-        return this.directories.has(name);
+        return this.directories.has(name)
     }
 
     public hasDirectories(): boolean {
-        return this.directories.size !== 0;
+        return this.directories.size !== 0
     }
 
     public getNumberOfFiles() {
-        return this.files.size;
+        return this.files.size
     }
 
     public getNumberOfDirectories() {
-        return this.directories.size;
+        return this.directories.size
     }
 
     public get sizeInBytes(): number {
-        return this.dirInfo.sizeInBytes;
+        return this.dirInfo.sizeInBytes
     }
 
     public get totalNumberOfFiles(): number {
-        return this.dirInfo.totalNumberOfFiles;
+        return this.dirInfo.totalNumberOfFiles
     }
 
     public get totalNumberOfDirectories(): number {
-        return this.dirInfo.totalNumberOfDirectories;
+        return this.dirInfo.totalNumberOfDirectories
     }
 }
