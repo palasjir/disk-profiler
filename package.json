@@ -5,8 +5,8 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "lint": "eslint **/*.ts",
-    "format": "prettier --write \"**/*.ts\"",
+    "lint": "eslint **/*.{ts,tsx}",
+    "format": "prettier --write \"**/*.{ts,tsx}\"",
     "dev": "run-p 'dev:*'",
     "dev:electron": "electron .",
     "dev:renderer": "webpack --config webpack.config.renderer.js --watch --mode=development",
@@ -16,7 +16,7 @@
     "build:main": "webpack --config webpack.config.main.js --mode=production",
     "start": "yarn build && electron .",
     "test": "run-s 'test:*'",
-    "test:format": "prettier --list-different \"**/*.ts\"",
+    "test:format": "prettier --list-different \"**/*.{ts,tsx}\"",
     "test:lint": "yarn lint",
     "test:unit": "jest",
     "scan": "ts-node ./scripts/scan.ts"
@@ -72,7 +72,7 @@
     }
   },
   "lint-staged": {
-    "*.ts": [
+    "*.{ts,tsx}": [
       "prettier --write",
       "git add"
     ]
