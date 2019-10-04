@@ -15,9 +15,21 @@ import {
 } from "../commons/types"
 import {action, computed, observable} from "mobx"
 import {EVENT_MSG_TO_APP, EVENT_MSG_TO_SCANNER} from "../commons/constants"
+import {take} from "lodash"
 
 async function openSelectDirectoryDialog(): Promise<OpenDialogReturnValue> {
     return remote.dialog.showOpenDialog({properties: ["openDirectory"]})
+}
+
+export enum ResultDisplay {
+    DASHBOARD,
+    FILES,
+    DIRECTORIES,
+}
+
+export enum GetMoreState {
+    READY,
+    PENDING,
 }
 
 export class AppStore {
@@ -25,19 +37,25 @@ export class AppStore {
     public scanState: ScanState = ScanState.NOT_STARTED
 
     @observable
+    public showMoreState: GetMoreState = GetMoreState.READY
+
+    @observable
+    public resultDisplay: ResultDisplay = ResultDisplay.DASHBOARD
+
+    @observable
     public selectedDirectory?: string
 
     @observable
-    public totalSize?: number
+    public totalSize?: number = 0
 
     @observable
-    public numberOfFiles?: number
+    public numberOfFiles: number = 0
 
     @observable
-    public numberOfFolders?: number
+    public numberOfFolders: number = 0
 
     @observable
-    public topFiles?: FileInfo[]
+    public topFiles: FileInfo[] = []
 
     public constructor() {
         ipcRenderer.on(EVENT_MSG_TO_APP, this.handleScanMsg)
@@ -89,11 +107,16 @@ export class AppStore {
     private readonly handleScanFinished = (msg: ToAppMessage): void => {
         this.scanState = ScanState.FINISHED
         const data = msg.data as ScanResultData
+
         if (data && data.tree) {
             this.totalSize = data.tree.size
             this.numberOfFiles = data.tree.numberOfFiles
             this.numberOfFolders = data.tree.numberOfFolders
             this.topFiles = data.tree.topFiles
+        }
+
+        if (msg.requestType === ToScannerMessageType.SHOW_MORE) {
+            this.showMoreState = GetMoreState.READY
         }
     }
 
@@ -109,6 +132,7 @@ export class AppStore {
             return
         }
         this.selectedDirectory = selectedDirectoryList.filePaths[0]
+        this.resultDisplay = ResultDisplay.DASHBOARD
 
         const msg: ToScannerMessage = {
             type: ToScannerMessageType.START,
@@ -144,9 +168,23 @@ export class AppStore {
 
     @action
     public showMoreFiles(): void {
+        if (this.showMoreState === GetMoreState.PENDING) {
+            return
+        }
         const msg: ToScannerMessage = {
             type: ToScannerMessageType.SHOW_MORE,
         }
+        this.showMoreState = GetMoreState.PENDING
         ipcRenderer.send(EVENT_MSG_TO_SCANNER, msg)
+    }
+
+    @action
+    public setResultDisplay(display: ResultDisplay) {
+        this.resultDisplay = display
+    }
+
+    @computed
+    public get top10Files(): FileInfo[] {
+        return take(this.topFiles, 10)
     }
 }

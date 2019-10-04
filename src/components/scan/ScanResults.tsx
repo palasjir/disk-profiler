@@ -1,71 +1,108 @@
 import {observer} from "mobx-react"
 import * as React from "react"
 import {AppStoreContext} from "../../store/AppStoreContext"
-import {useStyles} from "../../styles"
-import {Grid, Paper, Typography} from "@material-ui/core"
-import {ScanFolderButton, ShowMoreFilesButton} from "../support/buttons"
-import {ScanResultsStats} from "../support/ScanResultStats"
+import {
+    Divider,
+    Drawer,
+    List,
+    ListItem,
+    ListItemIcon,
+    ListItemText,
+} from "@material-ui/core"
 import {Page} from "../page"
-import {FsNodeTable} from "../support/FsTable"
+import {
+    Dashboard as DashboardIcon,
+    InsertDriveFile as FileIcon,
+    Folder as FolderIcon,
+} from "@material-ui/icons"
+import {useStyles} from "../../styles"
+import {ResultDisplay} from "../../store/AppStore"
+import {ScanFolderButton} from "../support/buttons"
+import {Dashboard} from "./Dashboard"
+import {DirectoryExplorer} from "./DirectoryExplorer"
+import {LargestFiles} from "./LargestFiles"
+
+function ResultDisplayComponent(props: {display: ResultDisplay}): JSX.Element {
+    switch (props.display) {
+        case ResultDisplay.DASHBOARD:
+            return <Dashboard />
+        case ResultDisplay.DIRECTORIES:
+            return <DirectoryExplorer />
+        case ResultDisplay.FILES:
+            return <LargestFiles />
+    }
+}
 
 export const ScanResults = observer(function ScanResult(): JSX.Element {
     const mainStore = React.useContext(AppStoreContext)
+    const resultDisplay = mainStore.resultDisplay
     const classes = useStyles({})
+
     return (
         <Page>
-            <Grid
-                container
-                spacing={2}
-                direction="column"
-                justify="flex-start"
-                alignItems="stretch"
-            >
-                <Grid item>
-                    <Paper className={classes.content}>
-                        <Typography variant="h5" gutterBottom>
-                            Scan finished. Watching for changes ...
-                        </Typography>
-                        <Typography gutterBottom>
-                            {mainStore.selectedDirectory}
-                        </Typography>
-                        <ScanFolderButton title="Scan new directory" />
-                    </Paper>
-                </Grid>
-                <Grid item>
-                    <Paper className={classes.content}>
-                        <ScanResultsStats
-                            sizeInBytes={mainStore.totalSize}
-                            numberOfFiles={mainStore.numberOfFiles}
-                            numberOfFolders={mainStore.numberOfFolders}
-                        />
-                    </Paper>
-                </Grid>
-                <Grid item>
-                    <Paper className={classes.content}>
-                        <Grid
-                            container
-                            direction="column"
-                            justify="flex-start"
-                            alignItems="stretch"
+            <div className={classes.root}>
+                <Drawer
+                    className={classes.drawer}
+                    variant="permanent"
+                    classes={{
+                        paper: classes.drawerPaper,
+                    }}
+                    anchor="left"
+                >
+                    <div className={classes.toolbar} />
+                    <Divider />
+                    <List>
+                        <ListItem
+                            button
+                            selected={resultDisplay === ResultDisplay.DASHBOARD}
+                            onClick={() =>
+                                mainStore.setResultDisplay(
+                                    ResultDisplay.DASHBOARD
+                                )
+                            }
                         >
-                            <Grid item>
-                                <div>
-                                    <Typography variant="h5" gutterBottom>
-                                        Largest Files
-                                    </Typography>
-                                    <FsNodeTable
-                                        rootPath={mainStore.selectedDirectory}
-                                        infos={mainStore.topFiles}
-                                    />
-                                </div>
-                            </Grid>
-                            <Grid item>
-                                <ShowMoreFilesButton />
-                            </Grid>
-                        </Grid>
-                    </Paper>
-                </Grid>
-            </Grid>
+                            <ListItemIcon>
+                                <DashboardIcon />
+                            </ListItemIcon>
+                            <ListItemText primary="Overview" />
+                        </ListItem>
+                        <ListItem
+                            button
+                            selected={resultDisplay === ResultDisplay.FILES}
+                            onClick={() =>
+                                mainStore.setResultDisplay(ResultDisplay.FILES)
+                            }
+                        >
+                            <ListItemIcon>
+                                <FileIcon />
+                            </ListItemIcon>
+                            <ListItemText primary="Largest Files" />
+                        </ListItem>
+                        <ListItem
+                            button
+                            selected={
+                                resultDisplay === ResultDisplay.DIRECTORIES
+                            }
+                            onClick={() =>
+                                mainStore.setResultDisplay(
+                                    ResultDisplay.DIRECTORIES
+                                )
+                            }
+                        >
+                            <ListItemIcon>
+                                <FolderIcon />
+                            </ListItemIcon>
+                            <ListItemText primary="Explore" />
+                        </ListItem>
+                        <ListItem>
+                            <ScanFolderButton title="New Scan" />
+                        </ListItem>
+                    </List>
+                </Drawer>
+                <main className={classes.content}>
+                    <ResultDisplayComponent display={resultDisplay} />
+                </main>
+            </div>
         </Page>
     )
 })

@@ -1,9 +1,11 @@
 import * as React from "react"
 
 import {AppStoreContext} from "../../store/AppStoreContext"
-import {Button} from "@material-ui/core"
+import {Button, CircularProgress} from "@material-ui/core"
 import {FolderOpenOutlined, GpsFixedOutlined} from "@material-ui/icons"
 import {useStyles} from "../../styles"
+import {GetMoreState} from "../../store/AppStore"
+import {observer} from "mobx-react"
 
 interface ScanFolderButtonProps {
     readonly title?: string
@@ -53,11 +55,28 @@ export function OpenInFileExplorerButton(
     )
 }
 
-export function ShowMoreFilesButton(): JSX.Element {
-    const mainStore = React.useContext(AppStoreContext)
-    return (
-        <Button onClick={() => mainStore.showMoreFiles()}>
-            Show more files
-        </Button>
-    )
-}
+export const ShowMoreFilesButton = observer(
+    function ShowMoreFilesButton(): JSX.Element {
+        const mainStore = React.useContext(AppStoreContext)
+        const classes = useStyles({})
+
+        return (
+            <div className={classes.buttonProgressWrapper}>
+                <Button
+                    variant="contained"
+                    color="primary"
+                    disabled={mainStore.showMoreState === GetMoreState.PENDING}
+                    onClick={() => mainStore.showMoreFiles()}
+                >
+                    Show more
+                </Button>
+                {mainStore.showMoreState === GetMoreState.PENDING && (
+                    <CircularProgress
+                        size={24}
+                        className={classes.buttonProgress}
+                    />
+                )}
+            </div>
+        )
+    }
+)

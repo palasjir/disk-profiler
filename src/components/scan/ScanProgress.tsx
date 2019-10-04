@@ -13,7 +13,7 @@ export const ScanProgress = observer(function ScanProgress(): JSX.Element {
 
     return (
         <Page>
-            <Paper className={classes.content}>
+            <Paper className={classes.paperContent}>
                 <Grid
                     container
                     spacing={2}

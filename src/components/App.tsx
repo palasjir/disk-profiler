@@ -7,6 +7,7 @@ import styled from "styled-components"
 import {ScanProgress} from "./scan/ScanProgress"
 import {ScanHome} from "./scan/ScanHome"
 import {ScanResults} from "./scan/ScanResults"
+import {CssBaseline} from "@material-ui/core"
 
 const StyledAppContainer = styled.div`
     display: flex;
@@ -32,6 +33,11 @@ function getPage(scanState: ScanState): JSX.Element {
 export const App = observer(function App(): JSX.Element {
     const mainStore = React.useContext(AppStoreContext)
     return (
-        <StyledAppContainer>{getPage(mainStore.scanState)}</StyledAppContainer>
+        <>
+            <CssBaseline />
+            <StyledAppContainer>
+                {getPage(mainStore.scanState)}
+            </StyledAppContainer>
+        </>
     )
 })

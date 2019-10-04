@@ -92,7 +92,8 @@ export default class ScannerProcess {
         this.watcher.moreFiles()
         this.messenger.sendScanUpdatedMsg(
             this.watcher.tree,
-            this.watcher.topFiles
+            this.watcher.topFiles,
+            ToScannerMessageType.SHOW_MORE
         )
     }
 }

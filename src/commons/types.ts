@@ -27,6 +27,7 @@ export interface ToScannerMessage {
 
 export interface ToAppMessage {
     readonly type: ToAppMessageType
+    readonly requestType?: ToScannerMessageType
     readonly data?: ScanStartEventData | ScanResultData
 }
 

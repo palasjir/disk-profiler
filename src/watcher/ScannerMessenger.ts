@@ -1,4 +1,10 @@
-import {FileInfo, ToAppMessage, ToAppMessageType} from "../commons/types"
+import {
+    FileInfo,
+    ToAppMessage,
+    ToAppMessageType,
+    ToScannerMessage,
+    ToScannerMessageType,
+} from "../commons/types"
 import {ipcRenderer} from "electron"
 import {EVENT_MSG_TO_APP} from "../commons/constants"
 import DirectoryTree from "../models/DirectoryTree"
@@ -34,7 +40,11 @@ export default class ScannerMessenger {
     }
 
     public sendScanUpdatedMsg = util.debounce(
-        (tree: DirectoryTree, topFiles?: FileInfo[]) => {
+        (
+            tree: DirectoryTree,
+            topFiles?: FileInfo[],
+            requestType?: ToScannerMessageType
+        ) => {
             const msg: ToAppMessage = {
                 type: ToAppMessageType.UPDATED,
                 data: {
@@ -45,6 +55,7 @@ export default class ScannerMessenger {
                         topFiles: topFiles,
                     },
                 },
+                requestType,
             }
             ipcRenderer.send(EVENT_MSG_TO_APP, msg)
         },
