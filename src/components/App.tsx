@@ -1,7 +1,7 @@
 import {observer} from "mobx-react"
 import * as React from "react"
 
-import {AppStoreContext} from "../store/AppStoreContext"
+import {useAppStore} from "../store/AppStoreContext"
 import {ScanState} from "../commons/types"
 import styled from "styled-components"
 import {ScanProgress} from "./scan/ScanProgress"
@@ -31,7 +31,7 @@ function getPage(scanState: ScanState): JSX.Element {
 }
 
 export const App = observer(function App(): JSX.Element {
-    const mainStore = React.useContext(AppStoreContext)
+    const mainStore = useAppStore()
     return (
         <>
             <CssBaseline />

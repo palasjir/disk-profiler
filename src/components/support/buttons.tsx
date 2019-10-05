@@ -1,6 +1,6 @@
 import * as React from "react"
 
-import {AppStoreContext} from "../../store/AppStoreContext"
+import {AppStoreContext, useAppStore} from "../../store/AppStoreContext"
 import {Button, CircularProgress} from "@material-ui/core"
 import {FolderOpenOutlined, GpsFixedOutlined} from "@material-ui/icons"
 import {useStyles} from "../../styles"
@@ -12,7 +12,7 @@ interface ScanFolderButtonProps {
 }
 
 export function ScanFolderButton(props: ScanFolderButtonProps): JSX.Element {
-    const mainStore = React.useContext(AppStoreContext)
+    const mainStore = useAppStore()
     const styles = useStyles({})
     return (
         <Button
@@ -26,7 +26,7 @@ export function ScanFolderButton(props: ScanFolderButtonProps): JSX.Element {
 }
 
 export function CancelScanButton(): JSX.Element {
-    const mainStore = React.useContext(AppStoreContext)
+    const mainStore = useAppStore()
     return (
         <Button
             variant="contained"
@@ -44,7 +44,7 @@ export interface OpenInFileExplorerButtonProps {
 export function OpenInFileExplorerButton(
     props: OpenInFileExplorerButtonProps
 ): JSX.Element {
-    const mainStore = React.useContext(AppStoreContext)
+    const mainStore = useAppStore()
     return (
         <Button
             onClick={() => mainStore.revealInFileExplorer(props.fullPath)}
@@ -57,7 +57,7 @@ export function OpenInFileExplorerButton(
 
 export const ShowMoreFilesButton = observer(
     function ShowMoreFilesButton(): JSX.Element {
-        const mainStore = React.useContext(AppStoreContext)
+        const mainStore = useAppStore()
         const classes = useStyles({})
 
         return (

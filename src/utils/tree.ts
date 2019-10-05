@@ -1,16 +1,12 @@
 import DirectoryTree from "../models/DirectoryTree"
 import DirectoryNode from "../models/DirectoryNode"
-import {concatPath} from "./path"
-import {FileInfo} from "../commons/types"
+import {DirListItemModel, DirListItemType, FileInfo} from "../commons/types"
 import * as util from "lodash"
-
-export function extractFileListFromTree(tree: DirectoryTree): FileInfo[] {
-    return extractFileListFromNode(tree.head, tree.rootPath)
-}
+import {NormalizedPath} from "./NormalizedPath"
 
 export function extractFileListFromNode(
     head: DirectoryNode,
-    rootPath: string
+    rootPath: NormalizedPath
 ): FileInfo[] {
     let list: FileInfo[] = []
 
@@ -18,7 +14,7 @@ export function extractFileListFromNode(
     for (const dir of dirs) {
         const found = extractFileListFromNode(
             dir,
-            concatPath(rootPath, dir.name)
+            rootPath.join(new NormalizedPath(dir.name))
         )
         list = list.concat(found)
     }
@@ -31,6 +27,44 @@ export function extractFileListFromNode(
     return list
 }
 
+export function extractFileListFromTree(tree: DirectoryTree): FileInfo[] {
+    return extractFileListFromNode(tree.head, tree.rootPath)
+}
+
 export function getTopFiles(list: FileInfo[], limit: number): FileInfo[] {
     return util.take(util.sortBy(list, item => -item.size), limit)
+}
+
+export function extractDirectoryListItemsFromNode(
+    node: DirectoryNode
+): DirListItemModel[] {
+    const items: DirListItemModel[] = []
+
+    for (const file of node.files.values()) {
+        items.push({
+            type: DirListItemType.FILE,
+            itemCount: undefined,
+            name: file.name,
+            size: file.info.size,
+        })
+    }
+
+    for (const dir of node.directories.values()) {
+        items.push({
+            type: DirListItemType.FOLDER,
+            itemCount: dir.files.size + dir.directories.size,
+            name: dir.name,
+            size: dir.sizeInBytes,
+        })
+    }
+
+    return util.sortBy(items, it => -it.size) // desc
+}
+
+export function extractDirectoryListItemsFromTree(
+    tree: DirectoryTree,
+    normalizedAbsolutePath: NormalizedPath
+): DirListItemModel[] {
+    const dir = tree.findDirectory(normalizedAbsolutePath)
+    return !dir ? [] : extractDirectoryListItemsFromNode(dir)
 }

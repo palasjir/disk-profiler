@@ -2,13 +2,13 @@ import * as React from "react"
 import {Button, Grid, Paper, Typography} from "@material-ui/core"
 import {ScanResultsStats} from "../support/ScanResultStats"
 import {FsNodeTable} from "../support/FsTable"
-import {AppStoreContext} from "../../store/AppStoreContext"
+import {useAppStore} from "../../store/AppStoreContext"
 import {useStyles} from "../../styles"
 import {observer} from "mobx-react"
 import {ResultDisplay} from "../../store/AppStore"
 
 export const Dashboard = observer(function Dashboard(): JSX.Element {
-    const mainStore = React.useContext(AppStoreContext)
+    const mainStore = useAppStore()
     const classes = useStyles({})
 
     return (
@@ -25,14 +25,14 @@ export const Dashboard = observer(function Dashboard(): JSX.Element {
                         Scan finished. Watching for changes ...
                     </Typography>
                     <Typography gutterBottom>
-                        {mainStore.selectedDirectory}
+                        {mainStore.selectedDirectory.asAbsolutePlatformSpecificPath()}
                     </Typography>
                 </Paper>
             </Grid>
             <Grid item>
                 <Paper className={classes.paperContent}>
                     <ScanResultsStats
-                        sizeInBytes={mainStore.totalSize}
+                        sizeInBytes={mainStore.totalSize || 0}
                         numberOfFiles={mainStore.numberOfFiles}
                         numberOfFolders={mainStore.numberOfFolders}
                     />
@@ -66,7 +66,7 @@ export const Dashboard = observer(function Dashboard(): JSX.Element {
                                     )
                                 }
                             >
-                                Show more files
+                                Show files
                             </Button>
                         </Grid>
                     </Grid>

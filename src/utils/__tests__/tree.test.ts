@@ -1,20 +1,21 @@
 import DirectoryTree from "../../models/DirectoryTree"
 import {
+    extractDirectoryListItemsFromTree,
     extractFileListFromNode,
     extractFileListFromTree,
     getTopFiles,
 } from "../tree"
-import {FileInfo} from "../../commons/types"
+import {DirListItemType, FileInfo} from "../../commons/types"
 import DirectoryNode from "../../models/DirectoryNode"
+import {NormalizedPath} from "../NormalizedPath"
 
-const rootPath = "/root/path"
+const rootPath = new NormalizedPath("/root/path")
 const fileData = (p: string): FileInfo => ({
     size: 500,
     lastModified: 0,
-    originalPath: p,
-    normalizedPath: p,
+    rawNormalizedAbsolutePath: new NormalizedPath(p).value,
 })
-const path = (p: string) => rootPath + p
+const path = (p: string) => rootPath.join(new NormalizedPath(p))
 
 describe("extractFileListFromTree()", () => {
     test("gets empty list for empty tree", () => {
@@ -100,26 +101,22 @@ describe("getTopFiles", () => {
     test("get top files", () => {
         const list: FileInfo[] = [
             {
-                originalPath: "/a",
-                normalizedPath: "/a",
+                rawNormalizedAbsolutePath: new NormalizedPath("/a").value,
                 lastModified: 0,
                 size: 10,
             },
             {
-                originalPath: "/b",
-                normalizedPath: "/b",
+                rawNormalizedAbsolutePath: new NormalizedPath("/b").value,
                 lastModified: 0,
                 size: 20,
             },
             {
-                originalPath: "/c",
-                normalizedPath: "/c",
+                rawNormalizedAbsolutePath: new NormalizedPath("/c").value,
                 lastModified: 0,
                 size: 30,
             },
             {
-                originalPath: "/d",
-                normalizedPath: "/d",
+                rawNormalizedAbsolutePath: new NormalizedPath("/d").value,
                 lastModified: 0,
                 size: 40,
             },
@@ -127,20 +124,17 @@ describe("getTopFiles", () => {
 
         const expected: FileInfo[] = [
             {
-                originalPath: "/d",
-                normalizedPath: "/d",
+                rawNormalizedAbsolutePath: new NormalizedPath("/d").value,
                 lastModified: 0,
                 size: 40,
             },
             {
-                originalPath: "/c",
-                normalizedPath: "/c",
+                rawNormalizedAbsolutePath: new NormalizedPath("/c").value,
                 lastModified: 0,
                 size: 30,
             },
             {
-                originalPath: "/b",
-                normalizedPath: "/b",
+                rawNormalizedAbsolutePath: new NormalizedPath("/b").value,
                 lastModified: 0,
                 size: 20,
             },
@@ -148,5 +142,27 @@ describe("getTopFiles", () => {
 
         const result = getTopFiles(list, 3)
         expect(result).toEqual(expected)
+    })
+})
+
+describe("extractDirectoryListItemsFromTree", () => {
+    const tree = new DirectoryTree(rootPath)
+    tree.addFile(path("/file1.txt"), fileData("/file1.txt"))
+    tree.addFile(path("/file2.txt"), fileData("/file2.txt"))
+
+    const result = extractDirectoryListItemsFromTree(tree, rootPath)
+
+    expect(result).toHaveLength(2)
+    expect(result).toContainEqual({
+        type: DirListItemType.FILE,
+        itemCount: undefined,
+        name: "file1.txt",
+        size: 500,
+    })
+    expect(result).toContainEqual({
+        type: DirListItemType.FILE,
+        itemCount: undefined,
+        name: "file2.txt",
+        size: 500,
     })
 })

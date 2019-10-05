@@ -1,7 +1,6 @@
 import DirectoryNode from "./DirectoryNode"
 import FileNode from "./FileNode"
 import {DirInfo} from "../commons/types"
-import {start} from "repl"
 
 export function emptyMeta(): DirInfo {
     return {
@@ -29,7 +28,9 @@ export function updateDirInfo(
         if (oldValue.hasOwnProperty(key)) {
             const _key = key as keyof DirInfo
             const valueUpdater = updater[_key]
-            updates[_key] = valueUpdater(oldValue)
+            if (valueUpdater) {
+                updates[_key] = valueUpdater(oldValue)
+            }
         }
     }
     return updates
@@ -39,8 +40,8 @@ export function updateDirInfoUp(
     startNode: DirectoryNode,
     updater: DirInfoUpdater
 ): void {
-    let currentNode: DirectoryNode = startNode
-    while (currentNode != null) {
+    let currentNode: DirectoryNode | null = startNode
+    while (currentNode) {
         currentNode.dirInfo = updateDirInfo(currentNode.dirInfo, updater)
         currentNode = currentNode.parent
     }

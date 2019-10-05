@@ -6,9 +6,7 @@ import {
     createRemoveDirectoryUpdater,
     createRemoveFileUpdater,
     createSetDirectoryUpdater,
-    DirInfoUpdater,
     emptyMeta,
-    updateDirInfo,
     updateDirInfoUp,
 } from "./DirInfoUpdater"
 
@@ -17,7 +15,7 @@ export default class DirectoryNode {
     readonly directories: Map<string, DirectoryNode> = new Map()
     readonly files: Map<string, FileNode> = new Map()
 
-    parent: DirectoryNode = null
+    parent: DirectoryNode | null = null
     dirInfo: DirInfo = emptyMeta()
 
     constructor(name: string, parent?: DirectoryNode | null) {
@@ -35,7 +33,7 @@ export default class DirectoryNode {
 
     public addEmptyDirectory(name: string): DirectoryNode {
         if (this.directories.has(name)) {
-            return this.directories.get(name)
+            return this.directories.get(name) as DirectoryNode
         }
 
         const newDir = new DirectoryNode(name, this)
@@ -67,7 +65,7 @@ export default class DirectoryNode {
 
     public addFile(name: string, data: FileInfo): FileNode | undefined {
         if (this.files.has(name)) {
-            return this.getFile(name)
+            return this.getFile(name) as FileNode
         }
         const newFile = new FileNode(name, data, this)
         this.files.set(name, newFile)

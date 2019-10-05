@@ -7,6 +7,7 @@ import {extractFileListFromTree} from "../utils/tree"
 import {getStats} from "../utils/scanner"
 import DebugLogger from "./DebugLogger"
 import {SortedFileList} from "./SortedFileList"
+import {NormalizedPath} from "../utils/NormalizedPath"
 
 export interface WatcherOptions {
     debug?: boolean
@@ -44,21 +45,21 @@ const NUMBER_OF_FILES_BATCH = 100
 
 export default class DirectoryWatcher {
     private logger: DebugLogger = new DebugLogger()
-    private path: string
-    private watcher: chokidar.FSWatcher
+    private path: NormalizedPath
+    private watcher: chokidar.FSWatcher | null
     private _tree: DirectoryTree
     private _topFiles?: SortedFileList
     private options: WatcherOptions
     private showNumberOfFiles = NUMBER_OF_FILES_BATCH
 
-    constructor(path: string, options?: WatcherOptions) {
+    constructor(path: NormalizedPath, options?: WatcherOptions) {
         this.path = path
         this.options = {
             ...DEFAULT_OPTIONS,
             ...options,
         }
-        this.logger.debug = options && options.debug
-        this.logger.afterReady = options && options.debugAfterReady
+        this.logger.debug = Boolean(options && options.debug)
+        this.logger.afterReady = Boolean(options && options.debugAfterReady)
     }
 
     public start(): Promise<void> {
@@ -68,7 +69,10 @@ export default class DirectoryWatcher {
         this._tree = new DirectoryTree(this.path)
         this._topFiles = undefined
         return new Promise((resolve, reject) => {
-            this.watcher = chokidar.watch(this.path, WATCHER_CONFIG)
+            this.watcher = chokidar.watch(
+                this.path.asAbsolutePlatformSpecificPath(),
+                WATCHER_CONFIG
+            )
             this.watcher
                 .on("error", e => {
                     this.onError(e)
@@ -94,62 +98,83 @@ export default class DirectoryWatcher {
     private onReady() {
         this.logger.isReady = true
         this.logger.log("Ready!")
-        this.options.onReady()
+        if (this.options.onReady) {
+            this.options.onReady()
+        }
     }
 
     private onError(error: any) {
         this.logger.log(`Error: ${error}`)
-        this.options.onError(error)
+        if (this.options.onError) {
+            this.options.onError(error)
+        }
     }
 
     private onDirRemoved(path: string) {
         this.logger.log(`Removing directory: ${path}`)
-        this._tree.removeDirectory(path)
-        this.options.onDirRemoved(path)
+        this._tree.removeDirectory(new NormalizedPath(path))
+        if (this.options.onDirRemoved) {
+            this.options.onDirRemoved(path)
+        }
     }
 
     private onFileRemoved(path: string) {
         this.logger.log(`Removing file: ${path}`)
-        const removed = this._tree.removeFile(path)
+        const removed = this._tree.removeFile(new NormalizedPath(path))
         if (removed && this._topFiles) {
             this._topFiles.remove(removed.info)
         }
-        if (removed) {
+        if (removed && this.options.onFileRemoved) {
             this.options.onFileRemoved(path)
         }
     }
 
     private onDirAdded(path: string) {
         this.logger.log(`Adding directory: ${path}`)
-        this._tree.addEmptyDirectory(path)
-        this.options.onDirAdded(path)
+        this._tree.addEmptyDirectory(new NormalizedPath(path))
+        if (this.options.onDirAdded) {
+            this.options.onDirAdded(path)
+        }
     }
 
     private onFileAdded(path: string, stats?: FS.Stats) {
         this.logger.log(`Adding file: ${path}`)
+
+        if (!stats) return
+
         const fileInfo = statsToFileData(path, stats)
-        this._tree.addFile(path, fileInfo)
+        this._tree.addFile(new NormalizedPath(path), fileInfo)
         if (this._topFiles) {
             this._topFiles.add(fileInfo)
         }
-        this.options.onFileAdded(path)
+        if (this.options.onFileAdded) {
+            this.options.onFileAdded(path)
+        }
     }
 
     private onFileChanged(path: string, stats?: FS.Stats) {
         this.logger.log(`Changing file: ${path}`)
+
+        if (!stats) return
+
         const fileInfo = statsToFileData(path, stats)
-        const updateResult = this._tree.updateFile(path, fileInfo)
+        const updateResult = this._tree.updateFile(
+            new NormalizedPath(path),
+            fileInfo
+        )
         if (updateResult && this._topFiles) {
             this._topFiles.update(fileInfo)
         }
-        if (updateResult) {
+        if (updateResult && this.options.onFileChanged) {
             this.options.onFileChanged(path)
         }
     }
 
     public stop() {
-        this.watcher.close()
-        this.watcher = null
+        if (this.watcher) {
+            this.watcher.close()
+            this.watcher = null
+        }
     }
 
     public get tree() {

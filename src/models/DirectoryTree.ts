@@ -1,68 +1,78 @@
 // Character that we will use for trie tree root.
 import DirectoryNode from "./DirectoryNode"
 import FileNode from "./FileNode"
-import {fragmentizePath, normalizeRoot} from "../utils/path"
 import {FileInfo} from "../commons/types"
 import {isEqual} from "lodash"
+import {NormalizedPath} from "../utils/NormalizedPath"
 
 const HEAD_CHARACTER = "."
 
 export default class DirectoryTree {
-    readonly rootPath: string
+    readonly rootPath: NormalizedPath
     readonly head: DirectoryNode
 
-    public constructor(rootPath: string) {
+    public constructor(rootPath: NormalizedPath) {
         this.head = new DirectoryNode(HEAD_CHARACTER)
-        this.rootPath = normalizeRoot(rootPath)
+        this.rootPath = rootPath
     }
 
-    public hasSameRoot(path: string) {
+    public hasSameRoot(path: NormalizedPath) {
         return path.startsWith(this.rootPath)
     }
 
-    public getPathFragments(path: string) {
-        return fragmentizePath(this.rootPath, path)
+    public getPathRelativeToRoot(absolutePath: NormalizedPath): NormalizedPath {
+        if (!this.hasSameRoot(absolutePath)) {
+            throw new Error("Not same root!")
+        }
+        return absolutePath.removeRoot(this.rootPath)
     }
 
-    public addEmptyDirectory(path: string): DirectoryNode {
-        if (!this.hasSameRoot(path)) {
-            return null
+    public addEmptyDirectory(
+        absolutePath: NormalizedPath
+    ): DirectoryNode | undefined {
+        try {
+            const pathFragments = this.getPathRelativeToRoot(absolutePath)
+            return this.createDirectoryStructure(pathFragments)
+        } catch (e) {
+            return undefined
         }
-        const pathFragments = this.getPathFragments(path)
-        return this.createDirectoryStructure(pathFragments)
     }
 
     /**
      *
-     * @param path
+     * @param absolutePath
      * @param data
-     * @return added file or null if no file
+     * @return added file or undefine if no file was added
      */
-    public addFile(path: string, data: FileInfo): FileNode | null {
-        if (!this.hasSameRoot(path)) {
-            return null
+    public addFile(
+        absolutePath: NormalizedPath,
+        data: FileInfo
+    ): FileNode | undefined {
+        if (!this.hasSameRoot(absolutePath)) {
+            return undefined
         }
-        const pathFragments = this.getPathFragments(path)
-        const directories = pathFragments.slice(0, pathFragments.length - 1)
+        const pathRelativeToRoot = this.getPathRelativeToRoot(absolutePath)
+        const lastIndex = pathRelativeToRoot.length - 1
+        const directories = pathRelativeToRoot.slice(0, lastIndex)
 
         const currentNode = this.createDirectoryStructure(directories)
-        return currentNode.addFile(
-            pathFragments[pathFragments.length - 1],
-            data
-        )
+        return currentNode.addFile(pathRelativeToRoot.value[lastIndex], data)
     }
 
     /**
      *
-     * @param path
+     * @param absoulutePath
      * @param newFileInfo
      * @return null if file is not updated
      */
-    public updateFile(path: string, newFileInfo: FileInfo): FileNode | null {
-        if (!this.hasSameRoot(path)) {
+    public updateFile(
+        absoulutePath: NormalizedPath,
+        newFileInfo: FileInfo
+    ): FileNode | null {
+        if (!this.hasSameRoot(absoulutePath)) {
             return null
         }
-        const file = this.findFile(path)
+        const file = this.findFile(absoulutePath)
         if (!file) {
             return null
         }
@@ -73,64 +83,84 @@ export default class DirectoryTree {
         return file
     }
 
-    public removeDirectory(path: string): DirectoryNode {
-        const pathFragments = this.getPathFragments(path)
-        const directoryParent = this.findDirectory(path, true)
-        const toRemove = pathFragments[pathFragments.length - 1]
+    public removeDirectory(
+        absoultePath: NormalizedPath
+    ): DirectoryNode | undefined {
+        const directoryParent = this.findDirectory(absoultePath, true)
+        if (!directoryParent) {
+            return undefined
+        }
+
+        const pathRelativeToRoot = this.getPathRelativeToRoot(absoultePath)
+        const lastIndex = pathRelativeToRoot.length - 1
+        const toRemove = pathRelativeToRoot.value[lastIndex]
         return directoryParent.removeDirectory(toRemove)
     }
 
     /**
      *
-     * @param path - path to file
+     * @param absolutePath - path to file
      * @return removed file
      */
-    public removeFile(path: string): FileNode | undefined {
-        const pathFragments = this.getPathFragments(path)
-        const directoryParent = this.findDirectory(path, true)
-        const toRemove = pathFragments[pathFragments.length - 1]
+    public removeFile(absolutePath: NormalizedPath): FileNode | undefined {
+        const directoryParent = this.findDirectory(absolutePath, true)
+
+        if (!directoryParent) {
+            return undefined
+        }
+
+        const pathRelativeToRoot = this.getPathRelativeToRoot(absolutePath)
+        const lastIndex = pathRelativeToRoot.length - 1
+        const toRemove = pathRelativeToRoot.value[lastIndex]
         return directoryParent.removeFile(toRemove)
     }
 
-    public doesDirectoryExist(path: string): boolean {
-        return Boolean(this.findDirectory(path))
-    }
-
     public findDirectory(
-        path: string,
+        absolutePath: NormalizedPath,
         returnParent?: boolean
-    ): DirectoryNode | null {
-        const pathFragments = this.getPathFragments(path)
-        let currentNode = this.head
+    ): DirectoryNode | undefined {
+        try {
+            const pathRelativeToRoot = this.getPathRelativeToRoot(absolutePath)
+            let currentNode: DirectoryNode | undefined = this.head
 
-        const end = returnParent
-            ? pathFragments.length - 1
-            : pathFragments.length
+            const end = returnParent
+                ? pathRelativeToRoot.length - 1
+                : pathRelativeToRoot.length
 
-        for (let charIndex = 0; charIndex < end; charIndex += 1) {
-            if (!currentNode.hasDirectory(pathFragments[charIndex])) {
-                return null
+            for (let charIndex = 0; charIndex < end; charIndex += 1) {
+                if (
+                    !currentNode ||
+                    !currentNode.hasDirectory(
+                        pathRelativeToRoot.value[charIndex]
+                    )
+                ) {
+                    return undefined
+                }
+                currentNode = currentNode.getDirectory(
+                    pathRelativeToRoot.value[charIndex]
+                )
             }
 
-            currentNode = currentNode.getDirectory(pathFragments[charIndex])
+            return currentNode
+        } catch (e) {
+            return undefined
         }
-
-        return currentNode
     }
 
-    public findFile(path: string): FileNode | null {
-        const containingDirectory = this.findDirectory(path, true)
+    public findFile(absolutePath: NormalizedPath): FileNode | undefined {
+        const containingDirectory = this.findDirectory(absolutePath, true)
         if (!containingDirectory) {
-            return null
+            return undefined
         }
-        const pathFragments = this.getPathFragments(path)
-        const fileName = pathFragments[pathFragments.length - 1]
+        const pathRelativeToRoot = this.getPathRelativeToRoot(absolutePath)
+        const lastIndex = pathRelativeToRoot.length - 1
+        const fileName = pathRelativeToRoot.value[lastIndex]
 
         return containingDirectory.getFile(fileName)
     }
 
-    private createDirectoryStructure(pathFragments: string[]) {
-        if (pathFragments.length < 1) {
+    private createDirectoryStructure(pathRelativeToRoot: NormalizedPath) {
+        if (pathRelativeToRoot.length < 1) {
             return this.head
         }
 
@@ -138,10 +168,10 @@ export default class DirectoryTree {
 
         for (
             let pathFragmentIndex = 0;
-            pathFragmentIndex < pathFragments.length;
+            pathFragmentIndex < pathRelativeToRoot.length;
             pathFragmentIndex += 1
         ) {
-            const pathFragment = pathFragments[pathFragmentIndex]
+            const pathFragment = pathRelativeToRoot.value[pathFragmentIndex]
             currentNode = currentNode.addEmptyDirectory(pathFragment)
         }
 

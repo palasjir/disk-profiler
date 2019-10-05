@@ -1,4 +1,5 @@
 import {
+    DirectoryExplorerData,
     FileInfo,
     ToAppMessage,
     ToAppMessageType,
@@ -6,26 +7,41 @@ import {
     ToScannerMessageType,
 } from "../commons/types"
 import {ipcRenderer} from "electron"
-import {EVENT_MSG_TO_APP} from "../commons/constants"
+import {EVENT_MSG_TO_APP, EVENT_MSG_TO_SCANNER} from "../commons/constants"
 import DirectoryTree from "../models/DirectoryTree"
 import * as util from "lodash"
 
 export default class ScannerMessenger {
-    public sendScannerReadyMsg = () => {
+    public constructor(onMessage: (msg: ToScannerMessage) => void) {
+        ipcRenderer.on(
+            EVENT_MSG_TO_SCANNER,
+            (event: any, msg: ToScannerMessage) => onMessage(msg)
+        )
+    }
+
+    public readonly sendError = async (e: any) => {
+        const toAppMessage = {
+            type: ToAppMessageType.ERROR,
+            data: e,
+        }
+        ipcRenderer.send(EVENT_MSG_TO_APP, toAppMessage)
+    }
+
+    public readonly sendScannerReadyMsg = () => {
         const msg: ToAppMessage = {
             type: ToAppMessageType.READY,
         }
         ipcRenderer.send(EVENT_MSG_TO_APP, msg)
     }
 
-    public sendScanInProgressMsg = () => {
+    public readonly sendScanInProgressMsg = () => {
         const msg: ToAppMessage = {
             type: ToAppMessageType.STARTED,
         }
         ipcRenderer.send(EVENT_MSG_TO_APP, msg)
     }
 
-    public sendScanFinishedMsg = (tree: DirectoryTree) => {
+    public readonly sendScanFinishedMsg = (tree: DirectoryTree) => {
         const msg: ToAppMessage = {
             type: ToAppMessageType.FINISHED,
             data: {
@@ -39,7 +55,7 @@ export default class ScannerMessenger {
         ipcRenderer.send(EVENT_MSG_TO_APP, msg)
     }
 
-    public sendScanUpdatedMsg = util.debounce(
+    public readonly sendScanUpdatedMsg = util.debounce(
         (
             tree: DirectoryTree,
             topFiles?: FileInfo[],
@@ -61,4 +77,14 @@ export default class ScannerMessenger {
         },
         1000
     )
+
+    public readonly sendDirectoryExplorerData = (
+        data: DirectoryExplorerData
+    ): void => {
+        const msg: ToAppMessage = {
+            type: ToAppMessageType.DIR_EXPLORER_DATA,
+            data: data,
+        }
+        ipcRenderer.send(EVENT_MSG_TO_APP, msg)
+    }
 }

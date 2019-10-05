@@ -1,11 +1,11 @@
 import DirectoryNode from "../DirectoryNode"
 import {FileInfo} from "../../commons/types"
+import {NormalizedPath} from "../../utils/NormalizedPath"
 
 const defaultFileData = {size: 500, lastModified: 0}
 const fileData = (p: string): FileInfo => ({
     ...defaultFileData,
-    originalPath: p,
-    normalizedPath: p,
+    rawNormalizedAbsolutePath: new NormalizedPath(p).value,
 })
 
 describe("DirectoryNode", () => {
@@ -24,16 +24,14 @@ describe("DirectoryNode", () => {
         test("adding file updates size", () => {
             const sut = new DirectoryNode(".")
             sut.addFile("file1", {
-                originalPath: "file1",
-                normalizedPath: "file1",
+                rawNormalizedAbsolutePath: new NormalizedPath("file1").value,
                 size: 2000,
                 lastModified: 0,
             })
             expect(sut.sizeInBytes).toEqual(2000)
 
             sut.addFile("file2", {
-                originalPath: "file2",
-                normalizedPath: "file2",
+                rawNormalizedAbsolutePath: new NormalizedPath("file2").value,
                 size: 3000,
                 lastModified: 0,
             })

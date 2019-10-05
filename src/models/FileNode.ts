@@ -7,7 +7,7 @@ export default class FileNode {
     private _parent: DirectoryNode
     private _info: FileInfo
 
-    public constructor(name: string, info: FileInfo, parent?: DirectoryNode) {
+    public constructor(name: string, info: FileInfo, parent: DirectoryNode) {
         this._name = name
         this._info = info
         this._parent = parent

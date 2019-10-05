@@ -4,6 +4,7 @@ import * as rimraf from "rimraf"
 
 import DirectoryWatcher from "../src/watcher/DirectoryWatcher"
 import {statsToFileData} from "../src/utils/stats"
+import {NormalizedPath} from "../src/utils/NormalizedPath"
 
 const DEFAULT_FILE_CONTENT = "Hello world!"
 const INIT_FILE_NUMBER = 6
@@ -57,7 +58,7 @@ describe("Directory Watcher - integration tests", () => {
 
     beforeEach(() => {
         const options = {debug: true}
-        watcher = new DirectoryWatcher(rootPath, options)
+        watcher = new DirectoryWatcher(new NormalizedPath(rootPath), options)
         testSetup()
     })
 

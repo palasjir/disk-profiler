@@ -9,16 +9,17 @@ import * as React from "react"
 import {FileInfo} from "../../commons/types"
 import {formatSize} from "../../utils/format"
 import * as moment from "moment"
-import * as PATH from "path"
 import {OpenInFileExplorerButton} from "./buttons"
+import {toNormalizedPath} from "../../utils/path"
+import {NormalizedPath} from "../../utils/NormalizedPath"
 
 interface FsNodeTableProps {
-    readonly rootPath: string
+    readonly rootPath: NormalizedPath
     readonly infos?: FileInfo[]
 }
 
-function relativePath(rootPath: string, path: string) {
-    return `...${PATH.sep}${PATH.relative(rootPath, path)}`
+function relativePath(rootPath: NormalizedPath, path: NormalizedPath) {
+    return path.removeRoot(rootPath).asRelativePlatformSpecificPath()
 }
 
 export function FsNodeTable(props: FsNodeTableProps): JSX.Element | null {
@@ -35,24 +36,28 @@ export function FsNodeTable(props: FsNodeTableProps): JSX.Element | null {
                 </TableRow>
             </TableHead>
             <TableBody>
-                {props.infos.map(info => (
-                    <TableRow key={info.normalizedPath}>
-                        <TableCell component="th" scope="row">
-                            {relativePath(props.rootPath, info.originalPath)}
-                        </TableCell>
-                        <TableCell>{formatSize(info.size)}</TableCell>
-                        <TableCell>
-                            {moment(info.lastModified)
-                                .startOf("hour")
-                                .fromNow()}
-                        </TableCell>
-                        <TableCell>
-                            <OpenInFileExplorerButton
-                                fullPath={info.originalPath}
-                            />
-                        </TableCell>
-                    </TableRow>
-                ))}
+                {props.infos.map(info => {
+                    const normalizedPath = toNormalizedPath(
+                        info.rawNormalizedAbsolutePath
+                    )
+                    const path = normalizedPath.asAbsolutePlatformSpecificPath()
+                    return (
+                        <TableRow key={path}>
+                            <TableCell component="th" scope="row">
+                                {relativePath(props.rootPath, normalizedPath)}
+                            </TableCell>
+                            <TableCell>{formatSize(info.size)}</TableCell>
+                            <TableCell>
+                                {moment(info.lastModified)
+                                    .startOf("hour")
+                                    .fromNow()}
+                            </TableCell>
+                            <TableCell>
+                                <OpenInFileExplorerButton fullPath={path} />
+                            </TableCell>
+                        </TableRow>
+                    )
+                })}
             </TableBody>
         </Table>
     )

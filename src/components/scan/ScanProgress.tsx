@@ -1,6 +1,6 @@
 import {observer} from "mobx-react"
 import * as React from "react"
-import {AppStoreContext} from "../../store/AppStoreContext"
+import {useAppStore} from "../../store/AppStoreContext"
 import {useStyles} from "../../styles"
 import {Page} from "../page"
 import {Grid, LinearProgress, Paper, Typography} from "@material-ui/core"
@@ -8,7 +8,7 @@ import {ScanState} from "../../commons/types"
 import {CancelScanButton} from "../support/buttons"
 
 export const ScanProgress = observer(function ScanProgress(): JSX.Element {
-    const mainStore = React.useContext(AppStoreContext)
+    const mainStore = useAppStore()
     const classes = useStyles({})
 
     return (
@@ -27,7 +27,7 @@ export const ScanProgress = observer(function ScanProgress(): JSX.Element {
                                 {mainStore.inProgressMsg}
                             </Typography>
                             <Typography gutterBottom>
-                                {mainStore.selectedDirectory}
+                                {mainStore.selectedDirectory.asAbsolutePlatformSpecificPath()}
                             </Typography>
                             <LinearProgress />
                         </div>

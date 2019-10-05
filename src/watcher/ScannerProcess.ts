@@ -1,25 +1,29 @@
 import DirectoryWatcher from "./DirectoryWatcher"
 import {
+    DirectoryExplorerData,
+    GetDirectoryExplorerData,
     ScanStartEventData,
-    ToAppMessageType,
     ToScannerMessage,
     ToScannerMessageType,
 } from "../commons/types"
-import {ipcRenderer} from "electron"
-import {EVENT_MSG_TO_APP, EVENT_MSG_TO_SCANNER} from "../commons/constants"
 import DirectoryTree from "../models/DirectoryTree"
 import ScannerMessenger from "./ScannerMessenger"
+import {extractDirectoryListItemsFromTree} from "../utils/tree"
+import {toNormalizedPath} from "../utils/path"
 
 export default class ScannerProcess {
     private watcher?: DirectoryWatcher
-    private messenger = new ScannerMessenger()
+    private messenger: ScannerMessenger
+
+    public constructor() {
+        this.messenger = new ScannerMessenger(this.handleMessage)
+    }
 
     public init(): void {
-        ipcRenderer.on(EVENT_MSG_TO_SCANNER, this.handleMessage)
         this.messenger.sendScannerReadyMsg()
     }
 
-    private handleMessage = (event: any, msg: ToScannerMessage) => {
+    private handleMessage = (msg: ToScannerMessage): void => {
         console.log(`Received event ${msg.type}.`)
         switch (msg.type) {
             case ToScannerMessageType.START:
@@ -27,13 +31,19 @@ export default class ScannerProcess {
                 break
             case ToScannerMessageType.SHOW_MORE:
                 this.handleShowMoreFiles()
+                break
+            case ToScannerMessageType.GET_DIRECTORY_EXPLORER_DATA:
+                this.handleGetDirectoryExplorerData(msg)
+                break
             case ToScannerMessageType.CANCEL:
                 // main process is taking care of this
                 break
         }
     }
 
-    private getAndSendTopFiles = (tree: DirectoryTree) => {
+    private getAndSendTopFiles = (tree: DirectoryTree): void => {
+        if (!this.watcher) return
+
         this.watcher.initTopFiles()
         this.messenger.sendScanUpdatedMsg(tree, this.watcher.topFiles)
     }
@@ -49,7 +59,9 @@ export default class ScannerProcess {
         this.messenger.sendScanInProgressMsg()
         const data = msg.data as ScanStartEventData
 
-        const handleUpdate = () => {
+        const handleUpdate = (): void => {
+            if (!this.watcher) return
+
             if (canSendUpdates) {
                 this.messenger.sendScanUpdatedMsg(
                     this.watcher.tree,
@@ -66,34 +78,54 @@ export default class ScannerProcess {
             onDirRemoved: handleUpdate,
         }
 
-        const scannedPath = data.path
+        const scannedPath = toNormalizedPath(data.rawNormalizedRootPath)
         this.watcher = new DirectoryWatcher(scannedPath, options)
 
         try {
-            await this.watcher.start()
-            const tree = this.watcher.tree
-            this.messenger.sendScanFinishedMsg(tree)
-            canSendUpdates = true
-            this.getAndSendTopFiles(tree)
+            if (this.watcher) {
+                await this.watcher.start()
+                const tree = this.watcher.tree
+                this.messenger.sendScanFinishedMsg(tree)
+                canSendUpdates = true
+                this.getAndSendTopFiles(tree)
+            }
         } catch (e) {
-            this.sendScanError(e)
+            this.messenger.sendError(e)
         }
     }
 
-    private sendScanError = (e: any) => {
-        const toAppMessage = {
-            type: ToAppMessageType.ERROR,
-            data: e,
-        }
-        ipcRenderer.send(EVENT_MSG_TO_APP, toAppMessage)
-    }
+    private readonly handleShowMoreFiles = async (): Promise<void> => {
+        if (!this.watcher) return
 
-    private handleShowMoreFiles = () => {
         this.watcher.moreFiles()
         this.messenger.sendScanUpdatedMsg(
             this.watcher.tree,
             this.watcher.topFiles,
             ToScannerMessageType.SHOW_MORE
         )
+    }
+
+    private readonly handleGetDirectoryExplorerData = async (
+        msg: ToScannerMessage
+    ): Promise<void> => {
+        const data = msg.data as GetDirectoryExplorerData
+        const {rawNormalizedAbsolutePath} = data
+        const normalizedAbsolutePath = toNormalizedPath(
+            rawNormalizedAbsolutePath
+        )
+        try {
+            if (!this.watcher) return
+            const items = extractDirectoryListItemsFromTree(
+                this.watcher.tree,
+                normalizedAbsolutePath
+            )
+            const data: DirectoryExplorerData = {
+                rawNormalizedAbsolutePath: normalizedAbsolutePath.value,
+                items,
+            }
+            this.messenger.sendDirectoryExplorerData(data)
+        } catch (e) {
+            this.messenger.sendError(e)
+        }
     }
 }

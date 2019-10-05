@@ -2,11 +2,11 @@ import * as React from "react"
 import {Grid, Paper, Typography} from "@material-ui/core"
 import {FsNodeTable} from "../support/FsTable"
 import {ShowMoreFilesButton} from "../support/buttons"
-import {AppStoreContext} from "../../store/AppStoreContext"
+import {useAppStore} from "../../store/AppStoreContext"
 import {useStyles} from "../../styles"
 
 export function LargestFiles(): JSX.Element {
-    const appStore = React.useContext(AppStoreContext)
+    const appStore = useAppStore()
     const classes = useStyles({})
 
     return (

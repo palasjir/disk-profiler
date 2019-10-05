@@ -5,6 +5,7 @@ import {
     remote,
 } from "electron"
 import {
+    DirectoryExplorerData,
     FileInfo,
     ScanResultData,
     ScanState,
@@ -16,6 +17,8 @@ import {
 import {action, computed, observable} from "mobx"
 import {EVENT_MSG_TO_APP, EVENT_MSG_TO_SCANNER} from "../commons/constants"
 import {take} from "lodash"
+import {DirExplorerStore} from "./DirExplorerStore"
+import {NormalizedPath} from "../utils/NormalizedPath"
 
 async function openSelectDirectoryDialog(): Promise<OpenDialogReturnValue> {
     return remote.dialog.showOpenDialog({properties: ["openDirectory"]})
@@ -43,19 +46,21 @@ export class AppStore {
     public resultDisplay: ResultDisplay = ResultDisplay.DASHBOARD
 
     @observable
-    public selectedDirectory?: string
+    public selectedDirectory: NormalizedPath = new NormalizedPath()
 
     @observable
     public totalSize?: number = 0
 
     @observable
-    public numberOfFiles: number = 0
+    public numberOfFiles = 0
 
     @observable
-    public numberOfFolders: number = 0
+    public numberOfFolders = 0
 
     @observable
     public topFiles: FileInfo[] = []
+
+    public dirExplorerStore: DirExplorerStore = new DirExplorerStore()
 
     public constructor() {
         ipcRenderer.on(EVENT_MSG_TO_APP, this.handleScanMsg)
@@ -68,13 +73,13 @@ export class AppStore {
     ): void => {
         switch (msg.type) {
             case ToAppMessageType.READY:
-                this.handleScanReady(msg)
+                this.handleScanReady()
                 break
             case ToAppMessageType.CANCEL_IN_PROGRESS:
-                this.handleCancelInProgress(msg)
+                this.handleCancelInProgress()
                 break
             case ToAppMessageType.STARTED:
-                this.handleScanStarted(msg)
+                this.handleScanStarted()
                 break
             case ToAppMessageType.FINISHED:
                 this.handleScanFinished(msg)
@@ -85,21 +90,23 @@ export class AppStore {
             case ToAppMessageType.UPDATED:
                 this.handleScanFinished(msg)
                 break
+            case ToAppMessageType.DIR_EXPLORER_DATA:
+                this.handleDirExplorerData(msg)
         }
     }
 
     @action
-    private readonly handleScanReady = (msg: ToAppMessage): void => {
+    private readonly handleScanReady = (): void => {
         this.scanState = ScanState.NOT_STARTED
     }
 
     @action
-    private readonly handleCancelInProgress = (msg: ToAppMessage): void => {
+    private readonly handleCancelInProgress = (): void => {
         this.scanState = ScanState.CANCEL_IN_PROGRESS
     }
 
     @action
-    private readonly handleScanStarted = (msg: ToAppMessage): void => {
+    private readonly handleScanStarted = (): void => {
         this.scanState = ScanState.SCAN_IN_PROGRESS
     }
 
@@ -112,7 +119,15 @@ export class AppStore {
             this.totalSize = data.tree.size
             this.numberOfFiles = data.tree.numberOfFiles
             this.numberOfFolders = data.tree.numberOfFolders
-            this.topFiles = data.tree.topFiles
+            this.topFiles = data.tree.topFiles || []
+
+            if (
+                this.selectedDirectory !==
+                this.dirExplorerStore.normalizedRootPath
+            ) {
+                this.dirExplorerStore.initialize(this.selectedDirectory)
+                this.dirExplorerStore.loadDirectory(new NormalizedPath())
+            }
         }
 
         if (msg.requestType === ToScannerMessageType.SHOW_MORE) {
@@ -126,18 +141,32 @@ export class AppStore {
     }
 
     @action
+    private readonly handleDirExplorerData = (msg: ToAppMessage): void => {
+        const data = msg.data as DirectoryExplorerData
+        if (data && this.dirExplorerStore) {
+            this.dirExplorerStore.update(data.items)
+        }
+    }
+
+    @action
     public async startDirectoryScan(): Promise<void> {
         const selectedDirectoryList = await openSelectDirectoryDialog()
-        if (selectedDirectoryList.filePaths.length <= 0) {
+
+        if (
+            !selectedDirectoryList.filePaths ||
+            selectedDirectoryList.filePaths.length <= 0
+        ) {
             return
         }
-        this.selectedDirectory = selectedDirectoryList.filePaths[0]
+        this.selectedDirectory = new NormalizedPath(
+            selectedDirectoryList.filePaths[0]
+        )
         this.resultDisplay = ResultDisplay.DASHBOARD
 
         const msg: ToScannerMessage = {
             type: ToScannerMessageType.START,
             data: {
-                path: this.selectedDirectory,
+                rawNormalizedRootPath: this.selectedDirectory.value,
             },
         }
         ipcRenderer.send(EVENT_MSG_TO_SCANNER, msg)

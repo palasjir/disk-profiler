@@ -2,6 +2,7 @@ export enum ToScannerMessageType {
     START = "START",
     SHOW_MORE = "SHOW_MORE",
     CANCEL = "CANCEL",
+    GET_DIRECTORY_EXPLORER_DATA = "GET_DIRECTORY_EXPLORER_DATA",
 }
 
 export enum ToAppMessageType {
@@ -11,6 +12,7 @@ export enum ToAppMessageType {
     UPDATED = "UPDATED",
     READY = "READY",
     ERROR = "ERROR",
+    DIR_EXPLORER_DATA = "DIR_EXPLORER_DATA",
 }
 
 export enum ScanState {
@@ -20,23 +22,46 @@ export enum ScanState {
     FINISHED = "FINISHED",
 }
 
+export enum DirListItemType {
+    FOLDER,
+    FILE,
+}
+
+export type RawNormalizedPath = string[]
+
 export interface ToScannerMessage {
     readonly type: ToScannerMessageType
-    readonly data?: ScanStartEventData
+    readonly data?: ScanStartEventData | GetDirectoryExplorerData
 }
 
 export interface ToAppMessage {
     readonly type: ToAppMessageType
     readonly requestType?: ToScannerMessageType
-    readonly data?: ScanStartEventData | ScanResultData
+    readonly data?: ScanStartEventData | ScanResultData | DirectoryExplorerData
 }
 
 export interface ScanStartEventData {
-    readonly path: string
+    readonly rawNormalizedRootPath: RawNormalizedPath
+}
+
+export interface GetDirectoryExplorerData {
+    readonly rawNormalizedAbsolutePath: RawNormalizedPath
 }
 
 export interface ScanResultData {
     readonly tree: NodeStats
+}
+
+export interface DirListItemModel {
+    readonly type: DirListItemType
+    readonly name: string
+    readonly size: number
+    readonly itemCount?: number
+}
+
+export interface DirectoryExplorerData {
+    readonly rawNormalizedAbsolutePath: RawNormalizedPath
+    readonly items: DirListItemModel[]
 }
 
 export interface SecondaryStats {
@@ -52,9 +77,8 @@ export interface NodeStats extends SecondaryStats {
 export interface FileInfo {
     size: number
     lastModified: number
-    lastModifiedFormated?: Date
-    originalPath: string
-    normalizedPath: string
+    lastModifiedFormatted?: Date
+    rawNormalizedAbsolutePath: RawNormalizedPath
 }
 
 export interface DirInfo {

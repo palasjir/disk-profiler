@@ -1,6 +1,6 @@
 import * as FS from "fs"
 import {FileInfo} from "../commons/types"
-import {normalizePath} from "./path"
+import {NormalizedPath} from "./NormalizedPath"
 
 export function statsToFileData(
     originalPath: string,
@@ -9,8 +9,7 @@ export function statsToFileData(
     return {
         size: stats.size,
         lastModified: stats.mtimeMs,
-        lastModifiedFormated: stats.mtime,
-        originalPath,
-        normalizedPath: normalizePath(originalPath),
+        lastModifiedFormatted: stats.mtime,
+        rawNormalizedAbsolutePath: new NormalizedPath(originalPath).value,
     }
 }
