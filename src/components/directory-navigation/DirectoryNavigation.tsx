@@ -21,12 +21,8 @@ export function DirectoryNavigation(
     const items = pathRelativeToRoot.value.map((it, i) => {
         const fullPath = absolutePath.value.slice(0, i + 1).join("/")
 
-        function handleClick() {
-            dirExpStore.loadDirectory(new NormalizedPath())
-        }
-
         return (
-            <Link key={fullPath} color="inherit" onClick={handleClick}>
+            <Link key={fullPath} color="inherit">
                 {it}
             </Link>
         )
