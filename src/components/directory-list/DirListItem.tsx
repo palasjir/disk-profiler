@@ -6,16 +6,20 @@ import {
     ListItemAvatar,
     ListItemSecondaryAction,
     ListItemText,
+    Menu,
+    MenuItem,
 } from "@material-ui/core"
 import {
     ChevronRight,
     Folder as FolderIcon,
     InsertDriveFile as FileIcon,
+    MoreVert as MoreVertIcon,
 } from "@material-ui/icons"
 import styled from "styled-components"
 import {formatItems, formatSize} from "../../utils/format"
 import {DirListItemType} from "../../commons/types"
 import {useAppStore} from "../../store/AppStoreContext"
+import {NormalizedPath} from "../../models/NormalizedPath"
 
 const RightContainer = styled.div<{spacingFromRight: boolean}>`
     display: flex;
@@ -44,7 +48,17 @@ function ListItemIcon(props: {type: DirListItemType}): JSX.Element {
 
 export function DirListItem(props: DirListItemProps): JSX.Element {
     const store = useAppStore()
+    const dirExpStore = store.dirExplorerStore
+    const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null)
     const {type, name, itemCount, size} = props
+
+    const path = dirExpStore.currentAbsolutePath.join(
+        new NormalizedPath([name])
+    )
+
+    function closeMenu(): void {
+        setAnchorEl(null)
+    }
 
     return (
         <ListItem divider>
@@ -59,13 +73,33 @@ export function DirListItem(props: DirListItemProps): JSX.Element {
                     spacingFromRight={type === DirListItemType.FILE}
                 >
                     <ListItemText primary={formatSize(size)} />
+                    <div>
+                        <IconButton onClick={e => setAnchorEl(e.currentTarget)}>
+                            <MoreVertIcon />
+                        </IconButton>
+                        <Menu
+                            anchorEl={anchorEl}
+                            keepMounted
+                            open={Boolean(anchorEl)}
+                            onClose={closeMenu}
+                        >
+                            <MenuItem
+                                onClick={() => {
+                                    store.revealInFileExplorer(
+                                        path.asAbsolutePlatformSpecificPath()
+                                    )
+                                    closeMenu()
+                                }}
+                            >
+                                Show in file explorer
+                            </MenuItem>
+                        </Menu>
+                    </div>
                     {type === DirListItemType.FOLDER && (
                         <IconButton
                             edge="end"
                             aria-label="enter folder"
-                            onClick={() =>
-                                store.dirExplorerStore.navigateToDir(name)
-                            }
+                            onClick={() => dirExpStore.navigateToDir(name)}
                         >
                             <ChevronRight />
                         </IconButton>

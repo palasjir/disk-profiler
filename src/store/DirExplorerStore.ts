@@ -74,4 +74,8 @@ export class DirExplorerStore {
         )
         this.loadDirectory(pathRelativeToRoot)
     }
+
+    public get currentAbsolutePath(): NormalizedPath {
+        return this.normalizedRootPath.join(this.currentPathRelativeToRoot)
+    }
 }
