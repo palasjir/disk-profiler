@@ -19,7 +19,7 @@ export default class ScannerMessenger {
         )
     }
 
-    public readonly sendError = async (e: any) => {
+    public readonly sendError = async (e: any): Promise<void> => {
         const toAppMessage = {
             type: ToAppMessageType.ERROR,
             data: e,
@@ -27,21 +27,23 @@ export default class ScannerMessenger {
         ipcRenderer.send(EVENT_MSG_TO_APP, toAppMessage)
     }
 
-    public readonly sendScannerReadyMsg = () => {
+    public readonly sendScannerReadyMsg = async (): Promise<void> => {
         const msg: ToAppMessage = {
             type: ToAppMessageType.READY,
         }
         ipcRenderer.send(EVENT_MSG_TO_APP, msg)
     }
 
-    public readonly sendScanInProgressMsg = () => {
+    public readonly sendScanInProgressMsg = (): void => {
         const msg: ToAppMessage = {
             type: ToAppMessageType.STARTED,
         }
         ipcRenderer.send(EVENT_MSG_TO_APP, msg)
     }
 
-    public readonly sendScanFinishedMsg = (tree: DirectoryTree) => {
+    public readonly sendScanFinishedMsg = async (
+        tree: DirectoryTree
+    ): Promise<void> => {
         const msg: ToAppMessage = {
             type: ToAppMessageType.FINISHED,
             data: {
@@ -60,7 +62,7 @@ export default class ScannerMessenger {
             tree: DirectoryTree,
             topFiles?: FileInfo[],
             requestType?: ToScannerMessageType
-        ) => {
+        ): void => {
             const msg: ToAppMessage = {
                 type: ToAppMessageType.UPDATED,
                 data: {

@@ -16,7 +16,7 @@ export default class DirectoryTree {
         this.rootPath = rootPath
     }
 
-    public hasSameRoot(path: NormalizedPath) {
+    public hasSameRoot(path: NormalizedPath): boolean {
         return path.startsWith(this.rootPath)
     }
 
@@ -159,7 +159,9 @@ export default class DirectoryTree {
         return containingDirectory.getFile(fileName)
     }
 
-    private createDirectoryStructure(pathRelativeToRoot: NormalizedPath) {
+    private createDirectoryStructure(
+        pathRelativeToRoot: NormalizedPath
+    ): DirectoryNode {
         if (pathRelativeToRoot.length < 1) {
             return this.head
         }

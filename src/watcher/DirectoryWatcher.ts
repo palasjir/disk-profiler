@@ -8,6 +8,7 @@ import DebugLogger from "./DebugLogger"
 import {SortedFileList} from "./SortedFileList"
 import {NormalizedPath} from "../models/NormalizedPath"
 import {normalizePath} from "../utils/path"
+import {FileInfo} from "../commons/types"
 
 export interface WatcherOptions {
     debug?: boolean
@@ -90,12 +91,12 @@ export default class DirectoryWatcher {
         })
     }
 
-    public initTopFiles() {
+    public initTopFiles(): void {
         const files = extractFileListFromTree(this.tree)
         this._topFiles = new SortedFileList(files)
     }
 
-    private onReady() {
+    private onReady(): void {
         this.logger.isReady = true
         this.logger.log("Ready!")
         if (this.options.onReady) {
@@ -103,14 +104,14 @@ export default class DirectoryWatcher {
         }
     }
 
-    private onError(error: any) {
+    private onError(error: any): void {
         this.logger.log(`Error: ${error}`)
         if (this.options.onError) {
             this.options.onError(error)
         }
     }
 
-    private onDirRemoved(path: string) {
+    private onDirRemoved(path: string): void {
         this.logger.log(`Removing directory: ${path}`)
         this._tree.removeDirectory(normalizePath(path))
         if (this.options.onDirRemoved) {
@@ -118,7 +119,7 @@ export default class DirectoryWatcher {
         }
     }
 
-    private onFileRemoved(path: string) {
+    private onFileRemoved(path: string): void {
         this.logger.log(`Removing file: ${path}`)
         const removed = this._tree.removeFile(normalizePath(path))
         if (removed && this._topFiles) {
@@ -129,7 +130,7 @@ export default class DirectoryWatcher {
         }
     }
 
-    private onDirAdded(path: string) {
+    private onDirAdded(path: string): void {
         this.logger.log(`Adding directory: ${path}`)
         this._tree.addEmptyDirectory(normalizePath(path))
         if (this.options.onDirAdded) {
@@ -137,7 +138,7 @@ export default class DirectoryWatcher {
         }
     }
 
-    private onFileAdded(path: string, stats?: FS.Stats) {
+    private onFileAdded(path: string, stats?: FS.Stats): void {
         this.logger.log(`Adding file: ${path}`)
 
         if (!stats) return
@@ -152,7 +153,7 @@ export default class DirectoryWatcher {
         }
     }
 
-    private onFileChanged(path: string, stats?: FS.Stats) {
+    private onFileChanged(path: string, stats?: FS.Stats): void {
         this.logger.log(`Changing file: ${path}`)
 
         if (!stats) return
@@ -170,23 +171,23 @@ export default class DirectoryWatcher {
         }
     }
 
-    public stop() {
+    public stop(): void {
         if (this.watcher) {
             this.watcher.close()
             this.watcher = null
         }
     }
 
-    public get tree() {
+    public get tree(): DirectoryTree {
         return this._tree
     }
 
-    public get topFiles() {
+    public get topFiles(): FileInfo[] {
         if (!this._topFiles) return []
         return this._topFiles.getRange(this.showNumberOfFiles)
     }
 
-    public moreFiles() {
+    public moreFiles(): void {
         this.showNumberOfFiles += NUMBER_OF_FILES_BATCH
     }
 }

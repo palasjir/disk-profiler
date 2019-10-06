@@ -111,11 +111,11 @@ export default class DirectoryNode {
         return this.directories.size !== 0
     }
 
-    public getNumberOfFiles() {
+    public getNumberOfFiles(): number {
         return this.files.size
     }
 
-    public getNumberOfDirectories() {
+    public getNumberOfDirectories(): number {
         return this.directories.size
     }
 

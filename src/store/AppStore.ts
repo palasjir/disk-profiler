@@ -86,7 +86,7 @@ export class AppStore {
                 this.handleScanFinished(msg)
                 break
             case ToAppMessageType.ERROR:
-                this.handleScanError(msg)
+                this.handleScanError()
                 break
             case ToAppMessageType.UPDATED:
                 this.handleScanFinished(msg)
@@ -137,7 +137,7 @@ export class AppStore {
     }
 
     @action
-    private readonly handleScanError = (msg: ToAppMessage): void => {
+    private readonly handleScanError = (): void => {
         this.scanState = ScanState.NOT_STARTED
     }
 
@@ -192,7 +192,7 @@ export class AppStore {
         }
     }
 
-    public revealInFileExplorer(fullPath: string) {
+    public revealInFileExplorer(fullPath: string): void {
         remote.shell.showItemInFolder(fullPath)
     }
 
@@ -209,7 +209,7 @@ export class AppStore {
     }
 
     @action
-    public setResultDisplay(display: ResultDisplay) {
+    public setResultDisplay(display: ResultDisplay): void {
         this.resultDisplay = display
     }
 

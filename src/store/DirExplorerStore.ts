@@ -47,7 +47,7 @@ export class DirExplorerStore {
     }
 
     @action
-    public update(items: DirListItemModel[]) {
+    public update(items: DirListItemModel[]): void {
         this.isLoading = false
         this.items = items
     }
@@ -68,7 +68,7 @@ export class DirExplorerStore {
     }
 
     @action
-    public navigateToDir(name: string) {
+    public navigateToDir(name: string): void {
         const pathRelativeToRoot = this.currentPathRelativeToRoot.join(
             new NormalizedPath([name])
         )
