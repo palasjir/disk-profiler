@@ -19,10 +19,14 @@ export const DirectoryExplorer = observer(
                 direction="column"
                 justify="flex-start"
                 alignItems="stretch"
+                wrap="nowrap"
+                style={{height: "100%", overflow: "hidden"}}
             >
                 <Grid item>
                     <Paper className={classes.paperContent}>
-                        <Typography variant="h5">Directory Explorer</Typography>
+                        <Typography variant="h5">
+                            Explore Directories
+                        </Typography>
                     </Paper>
                 </Grid>
 
@@ -37,8 +41,11 @@ export const DirectoryExplorer = observer(
                     </Paper>
                 </Grid>
 
-                <Grid item>
-                    <Paper className={classes.paperContent}>
+                <Grid item style={{height: "100%", overflow: "hidden"}}>
+                    <Paper
+                        className={classes.paperContent}
+                        style={{height: "100%", overflow: "scroll"}}
+                    >
                         <DirList items={dirExplorerStore.items} />
                     </Paper>
                 </Grid>

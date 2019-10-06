@@ -18,13 +18,14 @@ export const Dashboard = observer(function Dashboard(): JSX.Element {
             direction="column"
             justify="flex-start"
             alignItems="stretch"
+            className={classes.contentGrid}
         >
             <Grid item>
                 <Paper className={classes.paperContent}>
                     <Typography variant="h5" gutterBottom>
                         Scan finished. Watching for changes ...
                     </Typography>
-                    <Typography gutterBottom>
+                    <Typography>
                         {mainStore.selectedDirectory.asAbsolutePlatformSpecificPath()}
                     </Typography>
                 </Paper>
@@ -38,24 +39,31 @@ export const Dashboard = observer(function Dashboard(): JSX.Element {
                     />
                 </Paper>
             </Grid>
-            <Grid item>
-                <Paper className={classes.paperContent}>
+            <Grid item style={{height: "100%", overflow: "hidden"}}>
+                <Paper
+                    className={classes.paperContent}
+                    style={{height: "100%", overflow: "hidden"}}
+                >
                     <Grid
                         container
                         direction="column"
                         justify="flex-start"
                         alignItems="stretch"
+                        wrap="nowrap"
+                        style={{height: "100%"}}
                     >
                         <Grid item>
                             <div>
                                 <Typography variant="h5" gutterBottom>
                                     10 Largest Files
                                 </Typography>
-                                <FsNodeTable
-                                    rootPath={mainStore.selectedDirectory}
-                                    infos={mainStore.top10Files}
-                                />
                             </div>
+                        </Grid>
+                        <Grid item style={{overflow: "scroll"}}>
+                            <FsNodeTable
+                                rootPath={mainStore.selectedDirectory}
+                                infos={mainStore.top10Files}
+                            />
                         </Grid>
                         <Grid item className={classes.moreButton}>
                             <Button

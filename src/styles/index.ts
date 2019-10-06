@@ -51,6 +51,14 @@ export const useStyles = makeStyles((theme: Theme) =>
             flexGrow: 1,
             backgroundColor: theme.palette.background.default,
             padding: theme.spacing(3),
+            height: "100vh",
+            width: "100%",
+            overflow: "hidden",
+        },
+        contentGrid: {
+            height: "100%",
+            width: "100%",
+            flexWrap: "nowrap",
         },
     })
 )

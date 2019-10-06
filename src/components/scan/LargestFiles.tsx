@@ -16,17 +16,20 @@ export function LargestFiles(): JSX.Element {
             direction="column"
             justify="flex-start"
             alignItems="stretch"
+            wrap="nowrap"
+            style={{height: "100%"}}
         >
             <Grid item>
                 <Paper className={classes.paperContent}>
-                    <Typography variant="h5" gutterBottom>
-                        Largest Files
-                    </Typography>
+                    <Typography variant="h5">Largest Files</Typography>
                 </Paper>
             </Grid>
 
-            <Grid item>
-                <Paper className={classes.paperContent}>
+            <Grid item style={{height: "100%", overflow: "hidden"}}>
+                <Paper
+                    className={classes.paperContent}
+                    style={{height: "100%", overflow: "scroll"}}
+                >
                     <FsNodeTable
                         rootPath={appStore.selectedDirectory}
                         infos={appStore.topFiles}
