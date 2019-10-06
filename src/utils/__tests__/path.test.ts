@@ -1,38 +1,59 @@
-import {fragmentizePath} from "../path"
+import {normalizePath} from "../path"
+import {NormalizedPath} from "../NormalizedPath"
 
-describe("fragmentizePath", () => {
-    test("should give empty array when root is same as path", () => {
-        const result = fragmentizePath("/root/path", "/root/path")
-        expect(result).toEqual([])
-    })
+describe("normalizePath", () => {
+    describe("constructor", () => {
+        test("path undefined", () => {
+            const result = normalizePath(undefined)
+            expect(result).toEqual(new NormalizedPath())
+        })
 
-    test("should give empty array when root (ends with slash) is same as path", () => {
-        const result = fragmentizePath("/root/path/", "/root/path")
-        expect(result).toEqual([])
-    })
-    test("should give empty array when root is same as path (ends with slash)", () => {
-        const result = fragmentizePath("/root/path", "/root/path/")
-        expect(result).toEqual([])
-    })
+        test("path null", () => {
+            const result = normalizePath(null)
+            expect(result).toEqual(new NormalizedPath())
+        })
 
-    test("should give undefined when path doesn't have the same root", () => {
-        const result = fragmentizePath("/root/path", "/falseroot/path")
-        expect(result).toBeUndefined()
-    })
+        test("path empty string", () => {
+            const result = normalizePath()
+            expect(result).toEqual(new NormalizedPath())
+        })
 
-    test("should give fragmentized path without root", () => {
-        const result = fragmentizePath(
-            "/root/path/",
-            "/root/path/folder1/folder2/file.txt"
-        )
-        expect(result).toEqual(["folder1", "folder2", "file.txt"])
-    })
+        test("root path POSIX", () => {
+            const result = normalizePath("/")
+            expect(result).toEqual(new NormalizedPath())
+        })
 
-    test("should give fragmentized path without root (root without / at the end)", () => {
-        const result = fragmentizePath(
-            "/root/path",
-            "/root/path/folder1/folder2/file.txt"
-        )
-        expect(result).toEqual(["folder1", "folder2", "file.txt"])
+        test("root path WINDOWS", () => {
+            const result = normalizePath("C:")
+            expect(result).toEqual(new NormalizedPath(["C:"]))
+        })
+
+        test("longer POSIX path", () => {
+            const result = normalizePath("/root/path/to/file.txt")
+            expect(result).toEqual(
+                new NormalizedPath(["root", "path", "to", "file.txt"])
+            )
+        })
+
+        test("longer WINDOWS path", () => {
+            const result = normalizePath("C:\\path\\to\\file.txt")
+            expect(result).toEqual(
+                new NormalizedPath(["C:", "path", "to", "file.txt"])
+            )
+        })
+
+        test("ignores trailing slash POSIX", () => {
+            const result = normalizePath("/root/path/to/directory/")
+            expect(result).toEqual(
+                new NormalizedPath(["root", "path", "to", "directory"])
+            )
+        })
+
+        test("ignores trailing slash WINDOWS", () => {
+            const result = normalizePath("C:\\path\\to\\directory\\")
+            expect(result).toEqual(
+                new NormalizedPath(["C:", "path", "to", "directory"])
+            )
+        })
     })
 })

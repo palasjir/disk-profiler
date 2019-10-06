@@ -1,6 +1,6 @@
 import {FileInfo} from "../commons/types"
 import * as util from "lodash"
-import {toNormalizedPath} from "../utils/path"
+import {NormalizedPath} from "../utils/NormalizedPath"
 
 export class SortedFileList {
     private list: FileInfo[]
@@ -12,7 +12,7 @@ export class SortedFileList {
         this.list = sorted ? list : util.sortBy(list, this.compare)
         this.list.forEach((it, i) =>
             this.map.set(
-                toNormalizedPath(
+                new NormalizedPath(
                     it.rawNormalizedAbsolutePath
                 ).asAbsolutePlatformSpecificPath(),
                 i
@@ -27,7 +27,7 @@ export class SortedFileList {
     public add(file: FileInfo): void {
         if (
             this.map.has(
-                toNormalizedPath(
+                new NormalizedPath(
                     file.rawNormalizedAbsolutePath
                 ).asAbsolutePlatformSpecificPath()
             )
@@ -37,7 +37,7 @@ export class SortedFileList {
         const index = this.findIndex(file)
         this.list.splice(index, 0, file)
         this.map.set(
-            toNormalizedPath(
+            new NormalizedPath(
                 file.rawNormalizedAbsolutePath
             ).asAbsolutePlatformSpecificPath(),
             index
@@ -46,7 +46,7 @@ export class SortedFileList {
         // update indexes of the files that got moved
         for (let i = index + 1; i < this.list.length; i++) {
             this.map.set(
-                toNormalizedPath(
+                new NormalizedPath(
                     this.list[i].rawNormalizedAbsolutePath
                 ).asAbsolutePlatformSpecificPath(),
                 i
@@ -56,7 +56,7 @@ export class SortedFileList {
 
     public remove(fileInfo: FileInfo): void {
         const index = this.map.get(
-            toNormalizedPath(
+            new NormalizedPath(
                 fileInfo.rawNormalizedAbsolutePath
             ).asAbsolutePlatformSpecificPath()
         )
@@ -67,7 +67,7 @@ export class SortedFileList {
 
         if (
             this.map.delete(
-                toNormalizedPath(
+                new NormalizedPath(
                     fileInfo.rawNormalizedAbsolutePath
                 ).asAbsolutePlatformSpecificPath()
             )
@@ -78,7 +78,7 @@ export class SortedFileList {
         // update indexes of the files that got moved
         for (let i = index; i < this.list.length; i++) {
             this.map.set(
-                toNormalizedPath(
+                new NormalizedPath(
                     this.list[i].rawNormalizedAbsolutePath
                 ).asAbsolutePlatformSpecificPath(),
                 i

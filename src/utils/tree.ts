@@ -3,6 +3,7 @@ import DirectoryNode from "../models/DirectoryNode"
 import {DirListItemModel, DirListItemType, FileInfo} from "../commons/types"
 import * as util from "lodash"
 import {NormalizedPath} from "./NormalizedPath"
+import {normalizePath} from "./path"
 
 export function extractFileListFromNode(
     head: DirectoryNode,
@@ -12,10 +13,9 @@ export function extractFileListFromNode(
 
     const dirs = head.directories.values()
     for (const dir of dirs) {
-        const found = extractFileListFromNode(
-            dir,
-            rootPath.join(new NormalizedPath(dir.name))
-        )
+        const normPath = normalizePath(dir.name)
+        const absolutePath = rootPath.join(normPath)
+        const found = extractFileListFromNode(dir, absolutePath)
         list = list.concat(found)
     }
 

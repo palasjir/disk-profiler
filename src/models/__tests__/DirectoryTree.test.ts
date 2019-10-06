@@ -3,11 +3,12 @@ import {FileInfo} from "../../commons/types"
 import DirectoryNode from "../DirectoryNode"
 import FileNode from "../FileNode"
 import {NormalizedPath} from "../../utils/NormalizedPath"
+import {normalizePath} from "../../utils/path"
 
-const rootPath = new NormalizedPath("/root/path")
+const rootPath = new NormalizedPath(["root", "path"])
 const defaultFileData = {size: 500, lastModified: 0}
 
-const path = (p: string) => rootPath.join(new NormalizedPath(p))
+const path = (p: string) => rootPath.join(normalizePath(p))
 
 const fileData = (p: string): FileInfo => ({
     ...defaultFileData,
@@ -26,11 +27,11 @@ describe("DirectoryTree", () => {
         test("adds directory", () => {
             const sut = new DirectoryTree(rootPath)
 
-            const folder1Path = rootPath.join(new NormalizedPath("folder1"))
+            const folder1Path = rootPath.join(new NormalizedPath(["folder1"]))
             sut.addEmptyDirectory(folder1Path)
             expect(sut.head.getNumberOfDirectories()).toEqual(1)
 
-            const folder2Path = rootPath.join(new NormalizedPath("folder2"))
+            const folder2Path = rootPath.join(new NormalizedPath(["folder2"]))
             sut.addEmptyDirectory(folder2Path)
             expect(sut.head.getNumberOfDirectories()).toEqual(2)
         })
@@ -38,7 +39,7 @@ describe("DirectoryTree", () => {
         test(`can't add the same directory twice`, () => {
             const sut = new DirectoryTree(rootPath)
 
-            const folder1Path = rootPath.join(new NormalizedPath("folder1"))
+            const folder1Path = rootPath.join(new NormalizedPath(["folder1"]))
             sut.addEmptyDirectory(folder1Path)
             expect(sut.head.getNumberOfDirectories()).toEqual(1)
 
@@ -50,7 +51,7 @@ describe("DirectoryTree", () => {
             const sut = new DirectoryTree(rootPath)
 
             const folder1Path = rootPath.join(
-                new NormalizedPath("folder1/folder1")
+                new NormalizedPath(["folder1", "folder1"])
             )
             sut.addEmptyDirectory(folder1Path)
             expect(sut.head.getNumberOfDirectories()).toEqual(1)
@@ -69,7 +70,7 @@ describe("DirectoryTree", () => {
             expect(sut.head.totalNumberOfDirectories).toEqual(0)
 
             const filePath = rootPath.join(
-                new NormalizedPath("folder1/folder1")
+                new NormalizedPath(["folder1", "folder1"])
             )
             sut.addFile(filePath, fileData("/nested1/file.txt"))
 
@@ -130,7 +131,7 @@ describe("DirectoryTree", () => {
         })
 
         test("gives undefined when searching for directory with different root", () => {
-            const falseRoot = new NormalizedPath("/false/root")
+            const falseRoot = new NormalizedPath(["false", "root"])
             const sut = new DirectoryTree(rootPath)
             const found = sut.findDirectory(falseRoot)
             expect(found).toBeUndefined()

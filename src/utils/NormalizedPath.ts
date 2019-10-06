@@ -1,12 +1,11 @@
 import * as PATH from "path"
 import * as util from "lodash"
-import {normalizedPathArray} from "./path"
 
 export class NormalizedPath {
     private readonly _value: string[]
 
-    public constructor(path?: string | null) {
-        this._value = path ? normalizedPathArray(path) : []
+    public constructor(path: string[] = []) {
+        this._value = path
     }
 
     get value(): string[] {
@@ -38,17 +37,16 @@ export class NormalizedPath {
     }
 
     public join(other: NormalizedPath): NormalizedPath {
-        return new NormalizedPath(this._value.concat(other._value).join("/"))
+        return new NormalizedPath(this._value.concat(other._value))
     }
 
     public slice(start: number, end?: number): NormalizedPath {
-        return new NormalizedPath(this._value.slice(start, end).join("/"))
+        return new NormalizedPath(this._value.slice(start, end))
     }
 
     public removeRoot(root: NormalizedPath): NormalizedPath {
         if (this.startsWith(root)) {
-            const temp = this._value.slice(root.length)
-            return new NormalizedPath(temp.join("/"))
+            return new NormalizedPath(this._value.slice(root.length))
         }
         return this
     }

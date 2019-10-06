@@ -1,8 +1,8 @@
 import {SortedFileList} from "../SortedFileList"
 import {FileInfo} from "../../commons/types"
-import {NormalizedPath} from "../../utils/NormalizedPath"
+import {normalizePath} from "../../utils/path"
 
-const path = (p: string) => new NormalizedPath(p).value
+const path = (p: string) => normalizePath(p).value
 
 describe("SortedFileList", () => {
     test("asArray()", () => {

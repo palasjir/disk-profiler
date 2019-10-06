@@ -4,10 +4,10 @@ import * as FS from "fs"
 import {noop} from "../utils/base"
 import {statsToFileData} from "../utils/stats"
 import {extractFileListFromTree} from "../utils/tree"
-import {getStats} from "../utils/scanner"
 import DebugLogger from "./DebugLogger"
 import {SortedFileList} from "./SortedFileList"
 import {NormalizedPath} from "../utils/NormalizedPath"
+import {normalizePath} from "../utils/path"
 
 export interface WatcherOptions {
     debug?: boolean
@@ -112,7 +112,7 @@ export default class DirectoryWatcher {
 
     private onDirRemoved(path: string) {
         this.logger.log(`Removing directory: ${path}`)
-        this._tree.removeDirectory(new NormalizedPath(path))
+        this._tree.removeDirectory(normalizePath(path))
         if (this.options.onDirRemoved) {
             this.options.onDirRemoved(path)
         }
@@ -120,7 +120,7 @@ export default class DirectoryWatcher {
 
     private onFileRemoved(path: string) {
         this.logger.log(`Removing file: ${path}`)
-        const removed = this._tree.removeFile(new NormalizedPath(path))
+        const removed = this._tree.removeFile(normalizePath(path))
         if (removed && this._topFiles) {
             this._topFiles.remove(removed.info)
         }
@@ -131,7 +131,7 @@ export default class DirectoryWatcher {
 
     private onDirAdded(path: string) {
         this.logger.log(`Adding directory: ${path}`)
-        this._tree.addEmptyDirectory(new NormalizedPath(path))
+        this._tree.addEmptyDirectory(normalizePath(path))
         if (this.options.onDirAdded) {
             this.options.onDirAdded(path)
         }
@@ -143,7 +143,7 @@ export default class DirectoryWatcher {
         if (!stats) return
 
         const fileInfo = statsToFileData(path, stats)
-        this._tree.addFile(new NormalizedPath(path), fileInfo)
+        this._tree.addFile(normalizePath(path), fileInfo)
         if (this._topFiles) {
             this._topFiles.add(fileInfo)
         }
@@ -159,7 +159,7 @@ export default class DirectoryWatcher {
 
         const fileInfo = statsToFileData(path, stats)
         const updateResult = this._tree.updateFile(
-            new NormalizedPath(path),
+            normalizePath(path),
             fileInfo
         )
         if (updateResult && this._topFiles) {

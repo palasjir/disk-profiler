@@ -1,6 +1,6 @@
 import * as React from "react"
 import {Breadcrumbs, Button, Grid, Link} from "@material-ui/core"
-import {ChevronRight, ChevronLeft} from "@material-ui/icons"
+import {ChevronLeft} from "@material-ui/icons"
 import {NormalizedPath} from "../../utils/NormalizedPath"
 import {useAppStore} from "../../store/AppStoreContext"
 
