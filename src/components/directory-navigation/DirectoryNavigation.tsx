@@ -1,5 +1,5 @@
 import * as React from "react"
-import {Breadcrumbs, Button, Grid, Link} from "@material-ui/core"
+import {Breadcrumbs, Button, Grid, Link, Typography} from "@material-ui/core"
 import {ChevronLeft} from "@material-ui/icons"
 import {NormalizedPath} from "../../models/NormalizedPath"
 import {useAppStore} from "../../store/AppStoreContext"
@@ -18,13 +18,14 @@ export function DirectoryNavigation(
     const store = useAppStore()
     const dirExpStore = store.dirExplorerStore
 
-    const items = pathRelativeToRoot.value.map((it, i) => {
+    const breadcrumbItems = pathRelativeToRoot.value.map((it, i) => {
         const fullPath = absolutePath.value.slice(0, i + 1).join("/")
-
+        const color =
+            i === pathRelativeToRoot.length - 1 ? "textPrimary" : "inherit"
         return (
-            <Link key={fullPath} color="inherit">
+            <Typography key={fullPath} color={color}>
                 {it}
-            </Link>
+            </Typography>
         )
     })
 
@@ -42,7 +43,9 @@ export function DirectoryNavigation(
             </Grid>
 
             <Grid item>
-                <Breadcrumbs aria-label="breadcrumb">{items}</Breadcrumbs>
+                <Breadcrumbs aria-label="breadcrumb">
+                    {breadcrumbItems}
+                </Breadcrumbs>
             </Grid>
         </Grid>
     )
