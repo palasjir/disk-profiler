@@ -1,7 +1,11 @@
 import * as React from "react"
 import styled from "styled-components"
 
-import {formatSize} from "../../utils/format"
+import {
+    formatNumberOfDirs,
+    formatNumberOfFiles,
+    formatSize,
+} from "../../utils/format"
 
 interface ScanResultsStatsProps {
     readonly sizeInBytes: number
@@ -46,10 +50,10 @@ export const ScanResultsStats = function ScanResultsStats(
                     {formatSize(props.sizeInBytes)}
                 </StyledPrimaryStat>
                 <StyledSecondaryStat>
-                    {props.numberOfFiles} files{" "}
+                    {formatNumberOfFiles(props.numberOfFiles)}
                 </StyledSecondaryStat>
                 <StyledSecondaryStat>
-                    {props.numberOfFolders} folders
+                    {formatNumberOfDirs(props.numberOfFolders)}
                 </StyledSecondaryStat>
             </StyledScanResultsStats>
         </StyledScanResultsStatsContainer>

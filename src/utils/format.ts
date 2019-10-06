@@ -14,3 +14,18 @@ export function formatSize(size: number): string {
     const unit = UNITS[exponent]
     return numberString + " " + unit
 }
+
+export function formatItems(count?: number): string {
+    if (!count) return ""
+    return count === 1 ? `1 item` : `${count} items`
+}
+
+export function formatNumberOfFiles(count?: number): string {
+    if (!count) return "0 files"
+    return count === 1 ? `1 file` : `${count} files`
+}
+
+export function formatNumberOfDirs(count?: number): string {
+    if (!count) return "0 folders"
+    return count === 1 ? `1 folder` : `${count} folders`
+}

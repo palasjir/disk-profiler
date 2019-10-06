@@ -13,15 +13,11 @@ import {
     InsertDriveFile as FileIcon,
 } from "@material-ui/icons"
 import styled from "styled-components"
-import {formatSize} from "../../utils/format"
+import {formatItems, formatSize} from "../../utils/format"
 import {DirListItemType} from "../../commons/types"
 import {useAppStore} from "../../store/AppStoreContext"
 
-interface RightContainerProps {
-    readonly spacingFromRight: boolean
-}
-
-const RightContainer = styled.div<RightContainerProps>`
+const RightContainer = styled.div<{spacingFromRight: boolean}>`
     display: flex;
     align-items: center;
     ${props => props.spacingFromRight && "margin-right: 44px"};
@@ -30,15 +26,15 @@ const RightContainer = styled.div<RightContainerProps>`
     }
 `
 
-interface DirListItemProps {
+export interface DirListItemProps {
     readonly type: DirListItemType
     readonly name: string
     readonly size: number
     readonly itemCount?: number
 }
 
-function getIcon(type: DirListItemType) {
-    switch (type) {
+function ListItemIcon(props: {type: DirListItemType}): JSX.Element {
+    switch (props.type) {
         case DirListItemType.FILE:
             return <FileIcon />
         case DirListItemType.FOLDER:
@@ -46,24 +42,16 @@ function getIcon(type: DirListItemType) {
     }
 }
 
-function formatItems(count?: number): string {
-    if (!count) return ""
-    return count === 1 ? `1 item` : `${count} items`
-}
-
 export function DirListItem(props: DirListItemProps): JSX.Element {
-    const {type, name, itemCount, size} = props
-
     const store = useAppStore()
-
-    function handleClick() {
-        store.dirExplorerStore.navigateToDir(name)
-    }
+    const {type, name, itemCount, size} = props
 
     return (
         <ListItem divider>
             <ListItemAvatar>
-                <Avatar>{getIcon(type)}</Avatar>
+                <Avatar>
+                    <ListItemIcon type={type} />
+                </Avatar>
             </ListItemAvatar>
             <ListItemText primary={name} secondary={formatItems(itemCount)} />
             <ListItemSecondaryAction>
@@ -75,7 +63,9 @@ export function DirListItem(props: DirListItemProps): JSX.Element {
                         <IconButton
                             edge="end"
                             aria-label="enter folder"
-                            onClick={handleClick}
+                            onClick={() =>
+                                store.dirExplorerStore.navigateToDir(name)
+                            }
                         >
                             <ChevronRight />
                         </IconButton>
