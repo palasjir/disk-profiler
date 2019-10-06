@@ -1,8 +1,9 @@
+import * as util from "lodash"
+
 import DirectoryTree from "../models/DirectoryTree"
 import DirectoryNode from "../models/DirectoryNode"
+import {NormalizedPath} from "../models/NormalizedPath"
 import {DirListItemModel, DirListItemType, FileInfo} from "../commons/types"
-import * as util from "lodash"
-import {NormalizedPath} from "./NormalizedPath"
 import {normalizePath} from "./path"
 
 export function extractFileListFromNode(

@@ -10,8 +10,7 @@ import {FileInfo} from "../../commons/types"
 import {formatSize} from "../../utils/format"
 import * as moment from "moment"
 import {OpenInFileExplorerButton} from "./buttons"
-import {toNormalizedPath} from "../../utils/path"
-import {NormalizedPath} from "../../utils/NormalizedPath"
+import {NormalizedPath} from "../../models/NormalizedPath"
 
 interface FsNodeTableProps {
     readonly rootPath: NormalizedPath
@@ -37,7 +36,7 @@ export function FsNodeTable(props: FsNodeTableProps): JSX.Element | null {
             </TableHead>
             <TableBody>
                 {props.infos.map(info => {
-                    const normalizedPath = toNormalizedPath(
+                    const normalizedPath = new NormalizedPath(
                         info.rawNormalizedAbsolutePath
                     )
                     const path = normalizedPath.asAbsolutePlatformSpecificPath()

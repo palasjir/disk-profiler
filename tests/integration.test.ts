@@ -4,7 +4,6 @@ import * as rimraf from "rimraf"
 
 import DirectoryWatcher from "../src/watcher/DirectoryWatcher"
 import {statsToFileData} from "../src/utils/stats"
-import {NormalizedPath} from "../src/utils/NormalizedPath"
 import {normalizePath} from "../src/utils/path"
 
 const DEFAULT_FILE_CONTENT = "Hello world!"

@@ -18,7 +18,8 @@ import {action, computed, observable} from "mobx"
 import {EVENT_MSG_TO_APP, EVENT_MSG_TO_SCANNER} from "../commons/constants"
 import {take} from "lodash"
 import {DirExplorerStore} from "./DirExplorerStore"
-import {NormalizedPath} from "../utils/NormalizedPath"
+import {NormalizedPath} from "../models/NormalizedPath"
+import {normalizePath} from "../utils/path"
 
 async function openSelectDirectoryDialog(): Promise<OpenDialogReturnValue> {
     return remote.dialog.showOpenDialog({properties: ["openDirectory"]})
@@ -158,7 +159,7 @@ export class AppStore {
         ) {
             return
         }
-        this.selectedDirectory = new NormalizedPath(
+        this.selectedDirectory = normalizePath(
             selectedDirectoryList.filePaths[0]
         )
         this.resultDisplay = ResultDisplay.DASHBOARD

@@ -3,7 +3,7 @@ import DirectoryNode from "./DirectoryNode"
 import FileNode from "./FileNode"
 import {FileInfo} from "../commons/types"
 import {isEqual} from "lodash"
-import {NormalizedPath} from "../utils/NormalizedPath"
+import {NormalizedPath} from "./NormalizedPath"
 
 const HEAD_CHARACTER = "."
 

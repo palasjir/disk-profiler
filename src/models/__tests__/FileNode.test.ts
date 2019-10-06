@@ -1,6 +1,6 @@
 import DirectoryNode from "../DirectoryNode"
 import FileNode from "../FileNode"
-import {NormalizedPath} from "../../utils/NormalizedPath"
+import {NormalizedPath} from "../../models/NormalizedPath"
 
 describe("FileNode", () => {
     test("updating file node size updates parent", () => {

@@ -6,7 +6,7 @@ import {statsToFileData} from "../utils/stats"
 import {extractFileListFromTree} from "../utils/tree"
 import DebugLogger from "./DebugLogger"
 import {SortedFileList} from "./SortedFileList"
-import {NormalizedPath} from "../utils/NormalizedPath"
+import {NormalizedPath} from "../models/NormalizedPath"
 import {normalizePath} from "../utils/path"
 
 export interface WatcherOptions {

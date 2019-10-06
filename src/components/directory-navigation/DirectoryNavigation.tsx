@@ -1,7 +1,7 @@
 import * as React from "react"
 import {Breadcrumbs, Button, Grid, Link} from "@material-ui/core"
 import {ChevronLeft} from "@material-ui/icons"
-import {NormalizedPath} from "../../utils/NormalizedPath"
+import {NormalizedPath} from "../../models/NormalizedPath"
 import {useAppStore} from "../../store/AppStoreContext"
 
 export interface DirectoryNavigationProps {

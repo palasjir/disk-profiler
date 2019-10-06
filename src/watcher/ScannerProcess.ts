@@ -9,7 +9,7 @@ import {
 import DirectoryTree from "../models/DirectoryTree"
 import ScannerMessenger from "./ScannerMessenger"
 import {extractDirectoryListItemsFromTree} from "../utils/tree"
-import {toNormalizedPath} from "../utils/path"
+import {NormalizedPath} from "../models/NormalizedPath"
 
 export default class ScannerProcess {
     private watcher?: DirectoryWatcher
@@ -78,7 +78,7 @@ export default class ScannerProcess {
             onDirRemoved: handleUpdate,
         }
 
-        const scannedPath = toNormalizedPath(data.rawNormalizedRootPath)
+        const scannedPath = new NormalizedPath(data.rawNormalizedRootPath)
         this.watcher = new DirectoryWatcher(scannedPath, options)
 
         try {
@@ -110,7 +110,7 @@ export default class ScannerProcess {
     ): Promise<void> => {
         const data = msg.data as GetDirectoryExplorerData
         const {rawNormalizedAbsolutePath} = data
-        const normalizedAbsolutePath = toNormalizedPath(
+        const normalizedAbsolutePath = new NormalizedPath(
             rawNormalizedAbsolutePath
         )
         try {

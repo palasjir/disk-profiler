@@ -1,4 +1,4 @@
-import {NormalizedPath} from "./NormalizedPath"
+import {NormalizedPath} from "../models/NormalizedPath"
 
 export const DELIMITER = "/"
 

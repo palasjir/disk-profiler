@@ -6,7 +6,7 @@ import {
 } from "../commons/types"
 import {ipcRenderer} from "electron"
 import {EVENT_MSG_TO_SCANNER} from "../commons/constants"
-import {NormalizedPath} from "../utils/NormalizedPath"
+import {NormalizedPath} from "../models/NormalizedPath"
 
 export class DirExplorerStore {
     @observable
@@ -70,7 +70,7 @@ export class DirExplorerStore {
     @action
     public navigateToDir(name: string) {
         const pathRelativeToRoot = this.currentPathRelativeToRoot.join(
-            new NormalizedPath(name)
+            new NormalizedPath([name])
         )
         this.loadDirectory(pathRelativeToRoot)
     }

@@ -2,8 +2,8 @@ import DirectoryTree from "../DirectoryTree"
 import {FileInfo} from "../../commons/types"
 import DirectoryNode from "../DirectoryNode"
 import FileNode from "../FileNode"
-import {NormalizedPath} from "../../utils/NormalizedPath"
 import {normalizePath} from "../../utils/path"
+import {NormalizedPath} from "../NormalizedPath"
 
 const rootPath = new NormalizedPath(["root", "path"])
 const defaultFileData = {size: 500, lastModified: 0}

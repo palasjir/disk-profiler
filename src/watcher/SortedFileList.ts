@@ -1,6 +1,6 @@
 import {FileInfo} from "../commons/types"
 import * as util from "lodash"
-import {NormalizedPath} from "../utils/NormalizedPath"
+import {NormalizedPath} from "../models/NormalizedPath"
 
 export class SortedFileList {
     private list: FileInfo[]

@@ -7,8 +7,8 @@ import {
 } from "../tree"
 import {DirListItemType, FileInfo} from "../../commons/types"
 import DirectoryNode from "../../models/DirectoryNode"
-import {NormalizedPath} from "../NormalizedPath"
 import {normalizePath} from "../path"
+import {NormalizedPath} from "../../models/NormalizedPath"
 
 const rootPath = new NormalizedPath(["root", "path"])
 const fileData = (p: string[]): FileInfo => ({
