@@ -1,3 +1,5 @@
+const CopyPlugin = require("copy-webpack-plugin")
+
 module.exports = {
     entry: {
         main: "./src/main.ts",
@@ -35,4 +37,11 @@ module.exports = {
             },
         ],
     },
+
+    plugins: [
+        new CopyPlugin([
+            {from: "src/main/app.html", to: "app.html"},
+            {from: "src/main/scanner.html", to: "scanner.html"},
+        ]),
+    ],
 }

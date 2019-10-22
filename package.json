@@ -1,7 +1,7 @@
 {
   "name": "disk-profiler",
   "version": "1.0.0",
-  "main": "main.js",
+  "main": "dist/main.js",
   "license": "MIT",
   "private": true,
   "scripts": {
@@ -14,7 +14,8 @@
     "build": "yarn build:main && yarn build:renderer",
     "build:renderer": "webpack --config webpack.config.renderer.js --mode=production",
     "build:main": "webpack --config webpack.config.main.js --mode=production",
-    "start": "yarn build && electron .",
+    "start": "yarn build && yarn start:only",
+    "start:only": "electron dist/main.js",
     "test": "run-s 'test:*'",
     "test:format": "prettier --list-different \"**/*.{ts,tsx,js}\"",
     "test:lint": "yarn lint",
@@ -64,7 +65,8 @@
     "webpack-cli": "^3.3.8"
   },
   "dependencies": {
-    "chokidar": "^3.1.0"
+    "chokidar": "^3.1.0",
+    "copy-webpack-plugin": "^5.0.4"
   },
   "husky": {
     "hooks": {
